@@ -1,0 +1,2766 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>국립한국방송통신대학교 창원특례시동문회</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons for Beautiful UI -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font: Noto Sans KR -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        /* Custom scrollbar for clean UI */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- HEADER -->
+    <header class="bg-blue-900 text-white shadow-md sticky top-0 z-40 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Logo and Brand -->
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="navigateTo('home')">
+                    <div class="bg-amber-400 p-2.5 rounded-full shadow-inner flex items-center justify-center">
+                        <i class="fa-solid fa-graduation-cap text-blue-900 text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg sm:text-xl font-extrabold tracking-tight flex items-center gap-1">
+                            <span>한국방송통신대학교</span>
+                        </h1>
+                        <p class="text-xs text-amber-300 font-semibold tracking-wider">창원특례시동문회</p>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <nav class="hidden md:flex space-x-1 font-medium">
+                    <button onclick="navigateTo('home')" class="nav-btn px-4 py-2 rounded-lg hover:bg-blue-800 transition text-sm">홈</button>
+                    <button onclick="navigateTo('intro')" class="nav-btn px-4 py-2 rounded-lg hover:bg-blue-800 transition text-sm">동문회 소개</button>
+                    <button onclick="navigateTo('board-events')" class="nav-btn px-4 py-2 rounded-lg hover:bg-blue-800 transition text-sm">행사 이모저모</button>
+                    <button onclick="navigateTo('board-business')" class="nav-btn px-4 py-2 rounded-lg hover:bg-blue-800 transition text-sm">동문 사업 소개</button>
+                    <button onclick="navigateTo('board-free')" class="nav-btn px-4 py-2 rounded-lg hover:bg-blue-800 transition text-sm">자유게시판</button>
+                    <!-- Admin Only Menu -->
+                    <button onclick="navigateTo('admin-members')" class="nav-btn admin-only hidden px-4 py-2 rounded-lg bg-red-950 hover:bg-red-900 transition text-sm text-amber-300 font-bold border border-red-800">회원 관리</button>
+                </nav>
+
+                <!-- Auth Operations -->
+                <div class="hidden md:flex items-center space-x-3">
+                    <div id="user-profile-bar" class="hidden items-center space-x-3 bg-blue-950 px-4 py-1.5 rounded-full border border-blue-800">
+                        <span id="header-user-dept" class="text-xs bg-amber-400 text-blue-900 font-bold px-2 py-0.5 rounded">학과</span>
+                        <span id="header-user-name" class="text-sm font-semibold">동문님</span>
+                        <button onclick="handleLogout()" class="text-xs text-slate-300 hover:text-white underline ml-2">로그아웃</button>
+                    </div>
+                    <div id="guest-profile-bar" class="flex items-center space-x-2">
+                        <button onclick="openModal('modal-login')" class="bg-transparent border border-white hover:bg-white hover:text-blue-900 transition px-4 py-1.5 rounded-lg text-sm font-semibold">로그인</button>
+                        <button onclick="openModal('modal-signup')" class="bg-amber-400 text-blue-950 hover:bg-amber-300 transition px-4 py-1.5 rounded-lg text-sm font-bold shadow">회원가입</button>
+                    </div>
+                    <!-- Admin Indicator -->
+                    <button onclick="toggleAdminMode()" id="admin-indicator-btn" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs px-3 py-1.5 rounded-lg border border-slate-600 font-semibold flex items-center gap-1">
+                        <i class="fa-solid fa-user-gear"></i> <span id="admin-mode-text">관리자 모드 켜기</span>
+                    </button>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center gap-2">
+                    <button onclick="toggleAdminMode()" class="bg-slate-700 text-slate-200 text-xs p-2 rounded-lg" title="관리자 모드 전환">
+                        <i class="fa-solid fa-user-gear"></i>
+                    </button>
+                    <button onclick="toggleMobileMenu()" class="text-slate-200 hover:text-white p-2 focus:outline-none">
+                        <i class="fa-solid fa-bars text-2xl" id="menu-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu (Drawer) -->
+        <div id="mobile-menu" class="hidden md:hidden bg-blue-950 border-t border-blue-800 px-4 pt-2 pb-6 space-y-2">
+            <button onclick="navigateTo('home')" class="block w-full text-left px-3 py-2.5 rounded-lg text-base font-medium hover:bg-blue-900">홈</button>
+            <button onclick="navigateTo('intro')" class="block w-full text-left px-3 py-2.5 rounded-lg text-base font-medium hover:bg-blue-900">동문회 소개</button>
+            <button onclick="navigateTo('board-events')" class="block w-full text-left px-3 py-2.5 rounded-lg text-base font-medium hover:bg-blue-900">행사 이모저모</button>
+            <button onclick="navigateTo('board-business')" class="block w-full text-left px-3 py-2.5 rounded-lg text-base font-medium hover:bg-blue-900">동문 사업 소개</button>
+            <button onclick="navigateTo('board-free')" class="block w-full text-left px-3 py-2.5 rounded-lg text-base font-medium hover:bg-blue-900">자유게시판</button>
+            <button onclick="navigateTo('admin-members')" class="block w-full text-left px-3 py-2.5 rounded-lg text-base font-bold bg-red-950 text-amber-300 border border-red-900 admin-only hidden">회원 관리</button>
+            <hr class="border-blue-800 my-2">
+            <div id="mobile-user-profile-bar" class="hidden py-2 px-3 bg-blue-900 rounded-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <span id="m-header-user-dept" class="text-xs bg-amber-400 text-blue-900 font-bold px-2 py-0.5 rounded">학과</span>
+                        <span id="m-header-user-name" class="text-sm font-semibold ml-2 text-white">동문님</span>
+                    </div>
+                    <button onclick="handleLogout()" class="text-xs text-amber-300 underline">로그아웃</button>
+                </div>
+            </div>
+            <div id="mobile-guest-profile-bar" class="grid grid-cols-2 gap-2 pt-2">
+                <button onclick="openModal('modal-login')" class="text-center bg-transparent border border-slate-300 py-2 rounded-lg text-sm font-semibold">로그인</button>
+                <button onclick="openModal('modal-signup')" class="text-center bg-amber-400 text-blue-950 py-2 rounded-lg text-sm font-bold">회원가입</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-grow">
+        
+        <!-- SECTION: HOME -->
+        <section id="section-home" class="page-section">
+            <!-- Dynamic Main Hero Banner -->
+            <div class="relative bg-slate-900 text-white overflow-hidden shadow-lg">
+                <!-- Background Image Dynamic Layer -->
+                <div class="absolute inset-0 z-0">
+                    <img id="main-banner-img" src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&q=80&w=1600" alt="Alumni Main Banner" class="w-full h-full object-cover opacity-45 transform scale-105 transition-transform duration-1000">
+                </div>
+                <!-- Banner Content -->
+                <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 flex flex-col items-center text-center">
+                    <span class="bg-amber-400 text-blue-950 text-xs sm:text-sm font-bold uppercase tracking-widest px-3 py-1.5 rounded-full shadow mb-6">KNOU CHANGWON ALUMNI</span>
+                    <h2 id="main-banner-title" class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight mb-4 drop-shadow">
+                        함께 배우고 세상과 나누는<br>방송대 창원특례시동문회
+                    </h2>
+                    <p id="main-banner-subtitle" class="text-base sm:text-xl text-slate-200 max-w-3xl mb-10 drop-shadow font-light">
+                        배움의 끝없는 열정으로 뭉친 우리, 창원의 중심에서 소중한 동문 네트워크와 지식의 가치를 실현합니다.
+                    </p>
+                    <div class="flex flex-wrap justify-center gap-4">
+                        <button onclick="navigateTo('board-events')" class="bg-blue-700 hover:bg-blue-600 transition text-white px-8 py-3 rounded-full font-bold shadow-lg hover:shadow-xl flex items-center gap-2">
+                            <i class="fa-solid fa-images"></i> 행사 이모저모 보기
+                        </button>
+                        <button onclick="navigateTo('board-business')" class="bg-white text-blue-950 hover:bg-slate-100 transition px-8 py-3 rounded-full font-bold shadow-lg hover:shadow-xl flex items-center gap-2 border border-slate-200">
+                            <i class="fa-solid fa-briefcase"></i> 동문 업소 방문하기
+                        </button>
+                    </div>
+
+                    <!-- ADMIN MAIN BANNER EDITOR TOGGLE -->
+                    <div class="admin-only mt-8 bg-slate-800/80 backdrop-blur p-4 rounded-xl border border-dashed border-amber-400 max-w-md w-full hidden">
+                        <h4 class="text-xs font-bold text-amber-400 mb-2 text-left"><i class="fa-solid fa-screwdriver-wrench"></i> 메인 배너 사진 및 문구 편집기</h4>
+                        <div class="space-y-2 text-left text-xs">
+                            <label class="block">
+                                <span>메인 사진 선택 또는 주소 입력:</span>
+                                <select id="admin-banner-select" onchange="changeBannerPreset(this.value)" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded p-1.5 text-white">
+                                    <option value="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&q=80&w=1600">클래식 캠퍼스 전경</option>
+                                    <option value="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&q=80&w=1600">졸업 학사모와 기쁨</option>
+                                    <option value="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80&w=1600">동문 워크숍 & 네트워킹</option>
+                                    <option value="custom">직접 이미지 주소(URL) 입력...</option>
+                                </select>
+                            </label>
+                            <input type="text" id="admin-banner-custom-url" placeholder="https://..." class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-white hidden">
+                            <label class="block">
+                                <span>메인 타이틀 문구:</span>
+                                <input type="text" id="admin-banner-title-input" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-white">
+                            </label>
+                            <label class="block">
+                                <span>서브 타이틀 문구:</span>
+                                <textarea id="admin-banner-subtitle-input" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-white rows-2"></textarea>
+                            </label>
+                            <button onclick="saveBannerSettings()" class="w-full bg-amber-400 text-slate-950 font-bold py-1.5 rounded hover:bg-amber-300 transition">설정 즉시 저장 및 적용</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QUICK LINKS & STATS -->
+            <div class="bg-white border-b border-slate-200">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
+                        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-center items-center">
+                            <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-900 text-xl font-bold mb-3">
+                                <i class="fa-solid fa-people-group"></i>
+                            </div>
+                            <h4 class="text-sm text-slate-500 font-semibold mb-1">전체 가입 회원수</h4>
+                            <p class="text-2xl font-black text-slate-900"><span id="stats-members-count">0</span>명</p>
+                        </div>
+                        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-center items-center">
+                            <div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 text-xl font-bold mb-3">
+                                <i class="fa-solid fa-camera"></i>
+                            </div>
+                            <h4 class="text-sm text-slate-500 font-semibold mb-1">행사 이모저모</h4>
+                            <p class="text-2xl font-black text-slate-900"><span id="stats-events-count">0</span>건</p>
+                        </div>
+                        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-center items-center">
+                            <div class="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 text-xl font-bold mb-3">
+                                <i class="fa-solid fa-shop"></i>
+                            </div>
+                            <h4 class="text-sm text-slate-500 font-semibold mb-1">등록 동문 업체</h4>
+                            <p class="text-2xl font-black text-slate-900"><span id="stats-business-count">0</span>개소</p>
+                        </div>
+                        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-center items-center">
+                            <div class="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-xl font-bold mb-3">
+                                <i class="fa-solid fa-comments"></i>
+                            </div>
+                            <h4 class="text-sm text-slate-500 font-semibold mb-1">자유소통 게시글</h4>
+                            <p class="text-2xl font-black text-slate-900"><span id="stats-free-count">0</span>개</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DYNAMIC PRESIDENT GREETING PREVIEW -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+                <div class="lg:grid lg:grid-cols-12 lg:gap-12 items-center">
+                    <div class="lg:col-span-5 mb-10 lg:mb-0 relative">
+                        <div class="aspect-w-4 aspect-h-5 overflow-hidden rounded-3xl shadow-2xl border-4 border-white bg-slate-100 relative group">
+                            <img id="president-display-img" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=800" alt="President Photo" class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60"></div>
+                            <div class="absolute bottom-6 left-6 right-6 text-white">
+                                <span class="bg-amber-400 text-blue-950 text-xs font-black px-2.5 py-1 rounded mb-2 inline-block shadow">창원동문회 제12대 회장</span>
+                                <h3 id="president-display-name" class="text-2xl font-extrabold shadow-sm">김 홍 식</h3>
+                                <p id="president-display-dept" class="text-amber-200 text-sm font-semibold">경영학과 08학번</p>
+                            </div>
+                        </div>
+                        <!-- Admin President Photo Editor -->
+                        <div class="admin-only absolute -top-4 -right-4 hidden">
+                            <button onclick="openEditPresidentModal()" class="bg-amber-400 hover:bg-amber-300 text-blue-950 font-bold rounded-full p-4 shadow-xl border-2 border-white transition flex items-center justify-center">
+                                <i class="fa-solid fa-user-pen text-xl"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-7 space-y-6">
+                        <div class="inline-flex items-center space-x-2 text-blue-900 font-bold tracking-wider">
+                            <span class="w-8 h-1 bg-amber-400"></span>
+                            <span>회장 인사말</span>
+                        </div>
+                        <h3 id="president-display-title" class="text-2xl sm:text-4xl font-extrabold text-slate-900 leading-snug">
+                            "배움의 날개 아래 모인 소중한 창원 특례시 동문 여러분을 환영합니다!"
+                        </h3>
+                        <p id="president-display-message" class="text-slate-600 leading-relaxed text-base sm:text-lg whitespace-pre-line">
+                            안녕하십니까. 국립한국방송통신대학교 창원특례시동문회 제12대 회장 김홍식입니다.
+
+                            우리 방송통신대학교는 끊임없는 열정과 학구열로 가득 찬 특별한 공동체입니다. 낮에는 사회의 기둥으로, 밤에는 학문의 등불을 밝히는 우리 창원의 자랑스러운 동문 여러분의 끈기와 노고에 진심 어린 경의를 표합니다.
+
+                            본 동문회는 졸업생과 재학생 모두가 소중한 인연을 맺고, 서로의 길을 든든히 격려해 줄 수 있는 따뜻한 쉼터이자 비즈니스의 조력자가 되고자 합니다. 
+
+                            언제나 동문 여러분의 목소리에 귀 기울이며 활기찬 동문회를 만들어 가겠습니다. 감사합니다.
+                        </p>
+                        <div class="pt-4 border-t border-slate-200">
+                            <button onclick="navigateTo('intro')" class="text-blue-900 font-bold hover:text-blue-700 inline-flex items-center gap-2 group text-base">
+                                동문회 임원진 보러가기 
+                                <i class="fa-solid fa-arrow-right transform group-hover:translate-x-1 transition"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LATEST POSTS SNAPSHOT -->
+            <div class="bg-slate-100 py-16">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between items-end mb-8">
+                        <div>
+                            <h3 class="text-2xl font-extrabold text-slate-900">새로운 동문 소식</h3>
+                            <p class="text-sm text-slate-500 mt-1">실시간으로 업로드되는 동문들의 소식과 정보</p>
+                        </div>
+                        <button onclick="navigateTo('board-free')" class="text-sm text-blue-700 hover:text-blue-900 font-bold flex items-center gap-1">
+                            전체 소식 보기 <i class="fa-solid fa-chevron-right text-xs"></i>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Left: Event Preview -->
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between h-80">
+                            <div>
+                                <div class="flex justify-between items-center mb-4">
+                                    <span class="text-xs font-bold text-blue-900 bg-blue-100 px-2.5 py-1 rounded">행사 이모저모</span>
+                                    <button onclick="navigateTo('board-events')" class="text-xs text-slate-400 hover:text-slate-600"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                                <div id="home-event-preview-container" class="space-y-4">
+                                    <p class="text-slate-400 text-sm text-center py-10">등록된 최신 행사가 없습니다.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Center: Business Preview -->
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between h-80">
+                            <div>
+                                <div class="flex justify-between items-center mb-4">
+                                    <span class="text-xs font-bold text-emerald-900 bg-emerald-100 px-2.5 py-1 rounded">동문 신규 업소</span>
+                                    <button onclick="navigateTo('board-business')" class="text-xs text-slate-400 hover:text-slate-600"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                                <div id="home-business-preview-container" class="space-y-4">
+                                    <p class="text-slate-400 text-sm text-center py-10">등록된 최신 동문 업소가 없습니다.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Free Board Preview -->
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between h-80">
+                            <div>
+                                <div class="flex justify-between items-center mb-4">
+                                    <span class="text-xs font-bold text-amber-950 bg-amber-100 px-2.5 py-1 rounded">최신 수다방</span>
+                                    <button onclick="navigateTo('board-free')" class="text-xs text-slate-400 hover:text-slate-600"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                                <div id="home-free-preview-container" class="space-y-2 divide-y divide-slate-100">
+                                    <p class="text-slate-400 text-sm text-center py-10">작성된 자유글이 없습니다.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: INTRO (동문회 소개 & 임원진) -->
+        <section id="section-intro" class="page-section hidden py-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <span class="text-blue-900 font-bold uppercase tracking-wider text-sm">Organogram</span>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-2">창원특례시동문회 임원진 소개</h2>
+                    <p class="text-slate-500 mt-3">동문회를 위해 헌신하며 봉사하는 제12대 핵심 임원진들을 소개합니다.</p>
+                    <div class="admin-only mt-4 hidden">
+                        <button onclick="openModal('modal-add-executive')" class="bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs px-4 py-2 rounded-lg shadow inline-flex items-center gap-1.5">
+                            <i class="fa-solid fa-user-plus"></i> 새 임원 등록하기
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Executive Cards Grid -->
+                <div id="executive-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <!-- Loaded dynamically via js -->
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: BOARD EVENTS (행사 이모저모) -->
+        <section id="section-board-events" class="page-section hidden py-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-10 border-b border-slate-200 pb-6">
+                    <div>
+                        <h2 class="text-3xl font-extrabold text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-camera text-blue-900"></i> 행사 이모저모
+                        </h2>
+                        <p class="text-slate-500 mt-1">창원특례시동문회의 즐겁고 활기찬 공식 행사 현장 사진첩입니다.</p>
+                    </div>
+                    <button onclick="handleWritePostClick('events')" class="bg-blue-900 hover:bg-blue-800 text-white font-bold px-5 py-2.5 rounded-xl shadow-lg transition flex items-center gap-2 text-sm">
+                        <i class="fa-solid fa-pen-to-square"></i> 행사 사진 게시하기
+                    </button>
+                </div>
+
+                <!-- Events Gallery Grid -->
+                <div id="board-events-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Dynamic rendering -->
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: BOARD BUSINESS (동문 사업 소개) -->
+        <section id="section-board-business" class="page-section hidden py-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-10 border-b border-slate-200 pb-6">
+                    <div>
+                        <h2 class="text-3xl font-extrabold text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-shop text-emerald-600"></i> 동문 사업 소개
+                        </h2>
+                        <p class="text-slate-500 mt-1">동문님들이 운영하는 업소와 기업을 소개하고 서로 격려하며 상생하는 공간입니다.</p>
+                    </div>
+                    <button onclick="handleWritePostClick('business')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl shadow-lg transition flex items-center gap-2 text-sm">
+                        <i class="fa-solid fa-store"></i> 내 사업체 등록하기
+                    </button>
+                </div>
+
+                <!-- Business Grid -->
+                <div id="board-business-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Dynamic rendering -->
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: BOARD FREE (자유게시판) -->
+        <section id="section-board-free" class="page-section hidden py-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-8 border-b border-slate-200 pb-6">
+                    <div>
+                        <h2 class="text-3xl font-extrabold text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-comments text-amber-500"></i> 자유소통 수다방
+                        </h2>
+                        <p class="text-slate-500 mt-1">학업 고민, 일상 대화, 긴급 연락 등 자유롭게 소통하는 이야기방입니다.</p>
+                    </div>
+                    <button onclick="handleWritePostClick('free')" class="bg-amber-500 hover:bg-amber-400 text-blue-950 font-bold px-5 py-2.5 rounded-xl shadow-lg transition flex items-center gap-2 text-sm">
+                        <i class="fa-solid fa-pencil"></i> 자유글 작성하기
+                    </button>
+                </div>
+
+                <!-- Table board style -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-slate-200">
+                            <thead class="bg-slate-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider w-16">번호</th>
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">제목</th>
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider w-36">작성동문</th>
+                                    <th scope="col" class="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider w-24">조회수</th>
+                                    <th scope="col" class="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider w-32">작성일</th>
+                                </tr>
+                            </thead>
+                            <tbody id="board-free-tbody" class="bg-white divide-y divide-slate-200 text-sm">
+                                <!-- Dynamic rendering -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: ADMIN MEMBERS (회원 관리 대시보드 - Only Visible to Admin) -->
+        <section id="section-admin-members" class="page-section hidden py-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="mb-8 border-b border-slate-200 pb-6">
+                    <h2 class="text-3xl font-extrabold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-users-gear text-red-700"></i> 동문회 회원 관리
+                    </h2>
+                    <p class="text-slate-500 mt-1">창원특례시동문회 홈페이지에 가입한 회원들의 학기 및 권한 정보를 통제하고 가입을 관리합니다.</p>
+                </div>
+
+                <!-- Search and Stats Filter -->
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-col md:flex-row gap-4 justify-between items-center">
+                    <div class="relative w-full md:max-w-md">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </span>
+                        <input type="text" id="member-search-input" onkeyup="filterMembersList()" placeholder="이름, 학과, 또는 전화번호로 검색..." class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm">
+                    </div>
+                    <div class="text-xs text-slate-500 font-semibold flex gap-2">
+                        <span class="bg-slate-100 px-3 py-1.5 rounded-full">전체 명단: <strong id="member-total-count" class="text-blue-900">0</strong>명</span>
+                        <span class="bg-red-50 text-red-800 px-3 py-1.5 rounded-full">관리자 계정: <strong id="member-admin-count" class="text-red-900">0</strong>명</span>
+                    </div>
+                </div>
+
+                <!-- Members Table Layout -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-slate-200 text-sm">
+                            <thead class="bg-slate-50 text-slate-500 font-bold">
+                                <tr>
+                                    <th scope="col" class="px-6 py-4 text-left">가입일자</th>
+                                    <th scope="col" class="px-6 py-4 text-left">성명</th>
+                                    <th scope="col" class="px-6 py-4 text-left">소속 학과</th>
+                                    <th scope="col" class="px-6 py-4 text-left">생년월일(앞)</th>
+                                    <th scope="col" class="px-6 py-4 text-left">연락처</th>
+                                    <th scope="col" class="px-6 py-4 text-center">관리자 여부</th>
+                                    <th scope="col" class="px-6 py-4 text-center">작업</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-members-tbody" class="bg-white divide-y divide-slate-200 text-slate-700">
+                                <!-- Dynamic rendering via script -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-900 text-slate-400 py-12 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- Brand Info -->
+                <div class="md:col-span-2 space-y-4">
+                    <div class="flex items-center space-x-2">
+                        <div class="bg-amber-400 p-2 rounded-full">
+                            <i class="fa-solid fa-graduation-cap text-slate-900 text-lg"></i>
+                        </div>
+                        <span class="text-white font-extrabold text-lg">방송대 창원특례시동문회</span>
+                    </div>
+                    <p class="text-sm text-slate-500 leading-relaxed max-w-md">
+                        우리는 원격 교육의 기치를 들고, 평생 배움의 길에서 함께 나아가는 창원의 중심 동문 네트워크입니다. 동문회원간의 교류와 성장을 목표로 합니다.
+                    </p>
+                </div>
+                <!-- Links -->
+                <div>
+                    <h3 class="text-white text-sm font-bold tracking-wider uppercase mb-4">바로가기</h3>
+                    <ul class="space-y-2.5 text-sm">
+                        <li><a href="#" onclick="navigateTo('home')" class="hover:text-white transition">홈으로</a></li>
+                        <li><a href="#" onclick="navigateTo('intro')" class="hover:text-white transition">임원진 현황</a></li>
+                        <li><a href="#" onclick="navigateTo('board-events')" class="hover:text-white transition">행사 앨범</a></li>
+                        <li><a href="#" onclick="navigateTo('board-business')" class="hover:text-white transition">동문 사업장 찾기</a></li>
+                    </ul>
+                </div>
+                <!-- Info Address -->
+                <div>
+                    <h3 class="text-white text-sm font-bold tracking-wider uppercase mb-4">문의 및 연락처</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed mb-2">
+                        <i class="fa-solid fa-location-dot mr-1"></i> 경상남도 창원시 성산구 창원대학로 20 (창원학습관 내)
+                    </p>
+                    <p class="text-xs text-slate-500 mb-4">
+                        <i class="fa-solid fa-phone mr-1"></i> 동문회 총무팀: 010-0000-0000
+                    </p>
+                    <div class="flex space-x-3">
+                        <a href="https://www.knou.ac.kr" target="_blank" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center transition text-xs" title="국립한국방송통신대학교 공식홈">
+                            <i class="fa-solid fa-globe"></i>
+                        </a>
+                        <span class="text-xs text-slate-600 self-center">방송대 창원동문회 v2.0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-slate-800 text-center text-xs text-slate-600 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <p>&copy; 2026 국립한국방송통신대학교 창원특례시동문회. All Rights Reserved.</p>
+                <p class="flex items-center gap-2">
+                    <span>Designed with ❤️ for KNOU Changwon</span>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ==================== MODALS ==================== -->
+    
+    <!-- MODAL: 관리자 비밀번호 확인 (Admin Password Check) -->
+    <div id="modal-admin-password" class="fixed inset-0 z-50 overflow-y-auto hidden">
+        <div class="flex items-center justify-center min-h-screen px-4 py-6 text-center sm:block sm:p-0">
+            <!-- Overlay -->
+            <div class="fixed inset-0 transition-opacity bg-slate-900 bg-opacity-70" onclick="closeModal('modal-admin-password')"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+            
+            <!-- Modal Body -->
+            <div class="inline-block w-full max-w-sm my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-2xl rounded-2xl relative">
+                <div class="bg-blue-900 text-white px-6 py-4 flex justify-between items-center">
+                    <h3 class="text-sm font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-user-shield text-amber-400"></i> 관리자 본인 인증
+                    </h3>
+                    <button onclick="closeModal('modal-admin-password')" class="text-slate-300 hover:text-white">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <p class="text-xs text-slate-500 leading-relaxed">
+                        홈페이지 레이아웃 및 동문 권한 통제를 진행하려면 관리자 액세스 비밀번호를 정확히 입력해 주세요.
+                    </p>
+                    <form id="admin-password-form" onsubmit="event.preventDefault(); submitAdminPassword();">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">인증 비밀번호</label>
+                            <input type="password" id="ap-password" placeholder="비밀번호 4자리 입력" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm tracking-widest text-center font-bold">
+                        </div>
+                        <div class="mt-6 flex justify-end space-x-2">
+                            <button type="button" onclick="closeModal('modal-admin-password')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-xs font-semibold">취소</button>
+                            <button type="submit" class="bg-blue-900 hover:bg-blue-800 text-white px-5 py-2 rounded-lg text-xs font-bold shadow-lg">인증 확인</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: 회원가입 (Sign up) -->
+    <div id="modal-signup" class="fixed inset-0 z-50 overflow-y-auto hidden">
+        <div class="flex items-center justify-center min-h-screen px-4 py-6 text-center sm:block sm:p-0">
+            <!-- Overlay -->
+            <div class="fixed inset-0 transition-opacity bg-slate-900 bg-opacity-70" onclick="closeModal('modal-signup')"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+            
+            <!-- Modal Body -->
+            <div class="inline-block w-full max-w-md my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-2xl rounded-2xl relative">
+                <div class="bg-blue-900 text-white px-6 py-4 flex justify-between items-center">
+                    <h3 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-user-plus"></i> 동문회원 가입 신청</h3>
+                    <button onclick="closeModal('modal-signup')" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <p class="text-xs text-slate-500 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-100">
+                        * 창원특례시 동문 신원 및 가입 확인을 위해 아래의 필수 학적이 필요합니다. 수집된 소중한 개인정보는 외부 유출 없이 오직 동문회 가입 및 관리에만 안전하게 사용됩니다.
+                    </p>
+                    <form id="signup-form" onsubmit="event.preventDefault(); handleSignupSubmit();">
+                        <div class="space-y-4">
+                            <!-- Name -->
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">성명 (실명)</label>
+                                <input type="text" id="su-name" placeholder="홍길동" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm">
+                            </div>
+                            <!-- RRN Front -->
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">주민등록번호 앞자리 (6자리)</label>
+                                <input type="text" id="su-rrn" placeholder="920101" maxlength="6" pattern="\d{6}" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm" title="주민번호 앞 6자리를 입력해주세요.">
+                            </div>
+                            <!-- Department -->
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">소속 학과</label>
+                                <select id="su-dept" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm bg-white">
+                                    <option value="" disabled selected>학과를 선택해주세요</option>
+                                    <optgroup label="인문과학대학">
+                                        <option value="국어국문학과">국어국문학과</option>
+                                        <option value="영어영문학과">영어영문학과</option>
+                                        <option value="중어중문학과">중어중문학과</option>
+                                        <option value="프랑스언어문화학과">프랑스언어문화학과</option>
+                                    </optgroup>
+                                    <optgroup label="사회과학대학">
+                                        <option value="법학과">법학과</option>
+                                        <option value="행정학과">행정학과</option>
+                                        <option value="경영학과">경영학과</option>
+                                        <option value="무역학과">무역학과</option>
+                                        <option value="미디어영상학과">미디어영상학과</option>
+                                        <option value="관광학과">관광학과</option>
+                                        <option value="사회복지학과">사회복지학과</option>
+                                    </optgroup>
+                                    <optgroup label="자연과학대학">
+                                        <option value="농학과">농학과</option>
+                                        <option value="생활과학부">생활과학부</option>
+                                        <option value="컴퓨터과학과">컴퓨터과학과</option>
+                                        <option value="정보통계·데이터과학과">정보통계·데이터과학과</option>
+                                        <option value="보건환경학과">보건환경학과</option>
+                                    </optgroup>
+                                    <optgroup label="교육과학대학">
+                                        <option value="교육학과">교육학과</option>
+                                        <option value="청소년교육과">청소년교육과</option>
+                                        <option value="유아교육과">유아교육과</option>
+                                        <option value="문화교양학과">문화교양학과</option>
+                                        <option value="생활체육지도과">생활체육지도과</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                            <!-- Mobile phone -->
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">휴대폰 번호 (숫자만 입력)</label>
+                                <input type="tel" id="su-phone" placeholder="01012345678" pattern="[0-9]{10,11}" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm" title="하이픈(-) 없이 숫자만 작성해주세요.">
+                            </div>
+                        </div>
+                        <div class="mt-6 flex justify-end space-x-2">
+                            <button type="button" onclick="closeModal('modal-signup')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm font-semibold">취소</button>
+                            <button type="submit" class="bg-blue-900 hover:bg-blue-800 text-white px-6 py-2 rounded-lg text-sm font-bold shadow-lg">가입 완료하기</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: 회원 정보 수정 (Edit Member Info) -->
+    <div id="modal-edit-member" class="fixed inset-0 z-50 overflow-y-auto hidden">
+        <div class="flex items-center justify-center min-h-screen px-4 py-6 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity bg-slate-900 bg-opacity-70" onclick="closeModal('modal-edit-member')"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+            
+            <div class="inline-block w-full max-w-md my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-2xl rounded-2xl relative">
+                <div class="bg-blue-900 text-white px-6 py-4 flex justify-between items-center">
+                    <h3 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-user-pen"></i> 동문회원 정보 수정</h3>
+                    <button onclick="closeModal('modal-edit-member')" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <form id="edit-member-form" onsubmit="event.preventDefault(); handleEditMemberSubmit();">
+                        <input type="hidden" id="em-id">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">성명 (실명)</label>
+                                <input type="text" id="em-name" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">주민등록번호 앞자리 (6자리)</label>
+                                <input type="text" id="em-rrn" maxlength="6" pattern="\d{6}" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm" title="주민번호 앞 6자리를 입력해주세요.">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">소속 학과</label>
+                                <select id="em-dept" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm bg-white">
+                                    <option value="" disabled>학과를 선택해주세요</option>
+                                    <optgroup label="인문과학대학">
+                                        <option value="국어국문학과">국어국문학과</option>
+                                        <option value="영어영문학과">영어영문학과</option>
+                                        <option value="중어중문학과">중어중문학과</option>
+                                        <option value="프랑스언어문화학과">프랑스언어문화학과</option>
+                                    </optgroup>
+                                    <optgroup label="사회과학대학">
+                                        <option value="법학과">법학과</option>
+                                        <option value="행정학과">행정학과</option>
+                                        <option value="경영학과">경영학과</option>
+                                        <option value="무역학과">무역학과</option>
+                                        <option value="미디어영상학과">미디어영상학과</option>
+                                        <option value="관광학과">관광학과</option>
+                                        <option value="사회복지학과">사회복지학과</option>
+                                    </optgroup>
+                                    <optgroup label="자연과학대학">
+                                        <option value="농학과">농학과</option>
+                                        <option value="생활과학부">생활과학부</option>
+                                        <option value="컴퓨터과학과">컴퓨터과학과</option>
+                                        <option value="정보통계·데이터과학과">정보통계·데이터과학과</option>
+                                        <option value="보건환경학과">보건환경학과</option>
+                                    </optgroup>
+                                    <optgroup label="교육과학대학">
+                                        <option value="교육학과">교육학과</option>
+                                        <option value="청소년교육과">청소년교육과</option>
+                                        <option value="유아교육과">유아교육과</option>
+                                        <option value="문화교양학과">문화교양학과</option>
+                                        <option value="생활체육지도과">생활체육지도과</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">휴대폰 번호 (숫자만 입력)</label>
+                                <input type="tel" id="em-phone" pattern="[0-9]{10,11}" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm" title="하이픈(-) 없이 숫자만 작성해주세요.">
+                            </div>
+                            <div class="flex items-center space-x-3 pt-2">
+                                <input type="checkbox" id="em-is-admin" class="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500">
+                                <label for="em-is-admin" class="text-sm font-semibold text-slate-700 select-none">관리자 권한 부여</label>
+                            </div>
+                        </div>
+                        <div class="mt-6 flex justify-end space-x-2">
+                            <button type="button" onclick="closeModal('modal-edit-member')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm font-semibold">취소</button>
+                            <button type="submit" class="bg-blue-900 hover:bg-blue-800 text-white px-6 py-2 rounded-lg text-sm font-bold shadow-lg">수정 완료하기</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: 커스텀 확인 창 (Custom Confirm Modal) -->
+    <div id="modal-confirm" class="fixed inset-0 z-50 overflow-y-auto hidden">
+        <div class="flex items-center justify-center min-h-screen px-4 py-6 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity bg-slate-900 bg-opacity-70"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+            
+            <div class="inline-block w-full max-w-sm my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-2xl rounded-2xl relative">
+                <div class="bg-slate-900 text-white px-6 py-4 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-question text-amber-400"></i>
+                    <h3 class="text-sm font-bold" id="confirm-title">확인</h3>
+                </div>
+                <div class="p-6 space-y-4">
+                    <p class="text-sm text-slate-600" id="confirm-message">정말 진행하시겠습니까?</p>
+                    <div class="mt-6 flex justify-end space-x-2">
+                        <button type="button" id="confirm-cancel-btn" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-xs font-semibold">취소</button>
+                        <button type="button" id="confirm-ok-btn" class="bg-red-600 hover:bg-red-500 text-white px-5 py-2 rounded-lg text-xs font-bold shadow-lg">확인</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: 로그인 (Login) -->
+    <div id="modal-login" class="fixed inset-0 z-50 overflow-y-auto hidden">
+        <div class="flex items-center justify-center min-h-screen px-4 py-6 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity bg-slate-900 bg-opacity-70" onclick="closeModal('modal-login')"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+            
+            <div class="inline-block w-full max-w-md my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-2xl rounded-2xl relative">
+                <div class="bg-blue-900 text-white px-6 py-4 flex justify-between items-center">
+                    <h3 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-arrow-right-to-bracket"></i> 동문회원 인증 로그인</h3>
+                    <button onclick="closeModal('modal-login')" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <p class="text-xs text-slate-500 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-100">
+                        * 회원가입 시 기재하셨던 [이름]과 [휴대폰 번호]로 안전하게 일치 여부를 파악하여 로그인합니다.<br>
+                        <span class="text-blue-900 font-bold">💡 관리자 테스트 계정: 이름 "김홍식" / 휴대폰 "01000000000"</span>
+                    </p>
+                    <form id="login-form" onsubmit="event.preventDefault(); handleLoginSubmit();">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">성명</label>
+                                <input type="text" id="li-name" placeholder="홍길동" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">휴대폰 번호 (숫자만)</label>
+                                <input type="tel" id="li-phone" placeholder="01012345678" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm">
+                            </div>
+                        </div>
+                        <div class="mt-6 flex justify-end space-x-2">
+                            <button type="button" onclick="closeModal('modal-login')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm font-semibold">취소</button>
+                            <button type="submit" class="bg-blue-900 hover:bg-blue-800 text-white px-6 py-2 rounded-lg text-sm font-bold shadow-lg">인증 및 로그인</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: 글쓰기 (Write Post - Unified for Events, Business, Free) -->
+    <div id="modal-write-post" class="fixed inset-0 z-50 overflow-y-auto hidden">
+        <div class="flex items-center justify-center min-h-screen px-4 py-6 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity bg-slate-900 bg-opacity-70" onclick="closeModal('modal-write-post')"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+            
+            <div class="inline-block w-full max-w-lg my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-2xl rounded-2xl relative">
+                <div class="bg-slate-900 text-white px-6 py-4 flex justify-between items-center" id="write-modal-header">
+                    <h3 class="text-lg font-bold flex items-center gap-2" id="write-modal-title"><i class="fa-solid fa-pen-nib"></i> 게시판 작성</h3>
+                    <button onclick="closeModal('modal-write-post')" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <form id="write-post-form" onsubmit="event.preventDefault(); handleWriteSubmit();">
+                        <input type="hidden" id="wp-type">
+                        <div class="space-y-4">
+                            <div>
+                                <label id="wp-label-title" class="block text-sm font-semibold text-slate-700 mb-1">제목</label>
+                                <input type="text" id="wp-title" required placeholder="글 제목을 적어주세요." class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:outline-none text-sm">
+                            </div>
+                            <div>
+                                <label id="wp-label-content" class="block text-sm font-semibold text-slate-700 mb-1">내용</label>
+                                <textarea id="wp-content" required rows="6" placeholder="세부 내용을 상세하게 입력해 주세요." class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:outline-none text-sm"></textarea>
+                            </div>
+                            <div id="wp-extra-1-container" class="hidden">
+                                <label id="wp-label-extra-1" class="block text-sm font-semibold text-slate-700 mb-1">상호명</label>
+                                <input type="text" id="wp-extra-1" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:outline-none text-sm">
+                            </div>
+                            <div id="wp-extra-2-container" class="hidden">
+                                <label id="wp-label-extra-2" class="block text-sm font-semibold text-slate-700 mb-1">연락처 / 위치</label>
+                                <input type="text" id="wp-extra-2" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:outline-none text-sm">
+                            </div>
+                            <div id="wp-image-container" class="hidden bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">대표 이미지 설정</label>
+                                <select id="wp-image-preset" onchange="handlePresetImgChange(this.value)" class="w-full px-4 py-2 border border-slate-300 rounded-lg mb-2 text-sm bg-white">
+                                    <option value="">-- 어울리는 어셋 사진 선택하기 (권장) --</option>
+                                    <option value="https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&q=80&w=800">🎉 동문 정기 총회 및 파티</option>
+                                    <option value="https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&q=80&w=800">🎤 세미나 및 교육 특강</option>
+                                    <option value="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=800">🤝 소모임 및 친목 회의</option>
+                                    <option value="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=800">🏔️ 동문 산악회 야유회</option>
+                                    <option value="https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&q=80&w=800">💼 비즈니스 사무실/전문직</option>
+                                    <option value="https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&q=80&w=800">☕ 동문 카페 및 식음료 매장</option>
+                                    <option value="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80&w=800">💻 동문 테크/IT 비즈니스</option>
+                                    <option value="custom">🌐 이미지 직접 주소(URL) 입력...</option>
+                                    <option value="upload">📁 내 기기에서 직접 사진 올리기...</option>
+                                </select>
+                                <input type="text" id="wp-image-url" placeholder="https://..." class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 hidden">
+                                <input type="file" id="wp-image-file" accept="image/*" class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 hidden bg-white">
+                                <div class="mt-2 text-center">
+                                    <img id="wp-image-preview" src="https://placehold.co/400x200/e2e8f0/64748b?text=Preview" class="mx-auto rounded-lg max-h-32 object-cover border border-slate-200">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-6 flex justify-end space-x-2">
+                            <button type="button" onclick="closeModal('modal-write-post')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm font-semibold">취소</button>
+                            <button type="submit" class="bg-blue-900 hover:bg-blue-800 text-white px-6 py-2 rounded-lg text-sm font-bold shadow-lg">작성 게시하기</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: 게시물 상세 보기 (Post Detail Modal) -->
+    <div id="modal-post-detail" class="fixed inset-0 z-50 overflow-y-auto hidden">
+        <div class="flex items-center justify-center min-h-screen px-4 py-6 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity bg-slate-900 bg-opacity-70" onclick="closeModal('modal-post-detail')"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+            
+            <div class="inline-block w-full max-w-2xl my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-2xl rounded-2xl relative">
+                <div class="bg-blue-900 text-white px-6 py-4 flex justify-between items-center">
+                    <span id="detail-badge" class="text-xs font-black bg-amber-400 text-blue-900 px-2.5 py-1 rounded shadow">자유게시판</span>
+                    <button onclick="closeModal('modal-post-detail')" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+                </div>
+                <div class="p-6 space-y-6">
+                    <div class="border-b border-slate-200 pb-4">
+                        <h3 id="detail-title" class="text-2xl font-black text-slate-900">제목 영역입니다.</h3>
+                        <div class="flex items-center gap-4 text-xs text-slate-500 mt-2">
+                            <span class="flex items-center gap-1"><i class="fa-solid fa-user"></i> <strong id="detail-author" class="text-slate-700">홍길동</strong></span>
+                            <span class="flex items-center gap-1"><i class="fa-solid fa-calendar"></i> <span id="detail-date">2026.07.16</span></span>
+                            <span class="flex items-center gap-1"><i class="fa-solid fa-eye"></i> <span id="detail-views">0</span></span>
+                        </div>
+                    </div>
+
+                    <div id="detail-img-wrapper" class="hidden">
+                        <img id="detail-img" src="" alt="Post image" class="rounded-xl w-full max-h-80 object-cover shadow border border-slate-200">
+                    </div>
+
+                    <div id="detail-meta-box" class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm grid grid-cols-1 sm:grid-cols-2 gap-2 hidden">
+                        <div><strong class="text-slate-600" id="detail-meta-label-1">상호명:</strong> <span id="detail-meta-val-1" class="font-semibold text-slate-900"></span></div>
+                        <div><strong class="text-slate-600" id="detail-meta-label-2">연락처/위치:</strong> <span id="detail-meta-val-2" class="font-semibold text-slate-900"></span></div>
+                    </div>
+
+                    <div class="prose max-w-none text-slate-700 text-sm sm:text-base leading-relaxed whitespace-pre-line" id="detail-content">
+                        본문 내용 영역입니다.
+                    </div>
+
+                    <div class="flex justify-between items-center pt-6 border-t border-slate-200">
+                        <div class="flex items-center gap-2">
+                            <button id="detail-delete-btn" onclick="handleDeletePost()" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-4 py-2 rounded-lg text-xs transition border border-red-200">
+                                <i class="fa-solid fa-trash-can"></i> 글 삭제하기
+                            </button>
+                            <button id="detail-edit-btn" onclick="handleEditPostClick()" class="bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold px-4 py-2 rounded-lg text-xs transition border border-blue-200">
+                                <i class="fa-solid fa-pen-to-square"></i> 내용 및 이미지 수정
+                            </button>
+                        </div>
+                        <button onclick="closeModal('modal-post-detail')" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-5 py-2 rounded-lg text-sm transition">닫기</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: 동문회장 정보 수정 (Edit President Info) -->
+    <div id="modal-edit-president" class="fixed inset-0 z-50 overflow-y-auto hidden">
+        <div class="flex items-center justify-center min-h-screen px-4 py-6 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity bg-slate-900 bg-opacity-70" onclick="closeModal('modal-edit-president')"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+            
+            <div class="inline-block w-full max-w-md my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-2xl rounded-2xl relative">
+                <div class="bg-amber-400 text-slate-950 px-6 py-4 flex justify-between items-center">
+                    <h3 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-user-gear"></i> 회장단 프로필 편집</h3>
+                    <button onclick="closeModal('modal-edit-president')" class="text-slate-700 hover:text-slate-950"><i class="fa-solid fa-xmark text-xl"></i></button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <form id="edit-president-form" onsubmit="event.preventDefault(); savePresidentSettings();">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">성명</label>
+                                <input type="text" id="ep-name" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">소속 학과 및 학번</label>
+                                <input type="text" id="ep-dept" placeholder="예: 경영학과 08학번" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">사진 설정</label>
+                                <select id="ep-img-preset" onchange="handleEpPresetChange(this.value)" class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm bg-white mb-2">
+                                    <option value="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=800">대표 회장 기본 사진 (남성)</option>
+                                    <option value="custom">직접 이미지 URL 주소 입력...</option>
+                                    <option value="upload">📁 내 기기에서 직접 사진 올리기...</option>
+                                </select>
+                                <input type="text" id="ep-img" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:outline-none text-sm hidden">
+                                <input type="file" id="ep-img-file" accept="image/*" class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 hidden bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">핵심 한줄 인사</label>
+                                <input type="text" id="ep-title" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">상세 인사말 본문</label>
+                                <textarea id="ep-message" rows="5" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:outline-none text-sm"></textarea>
+                            </div>
+                        </div>
+                        <div class="mt-6 flex justify-end space-x-2">
+                            <button type="button" onclick="closeModal('modal-edit-president')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm font-semibold">취소</button>
+                            <button type="submit" class="bg-amber-400 hover:bg-amber-500 text-blue-950 font-bold px-6 py-2 rounded-lg text-sm shadow-lg">프로필 저장하기</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: 신규 임원진 등록 (Add Executive Info) -->
+    <div id="modal-add-executive" class="fixed inset-0 z-50 overflow-y-auto hidden">
+        <div class="flex items-center justify-center min-h-screen px-4 py-6 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity bg-slate-900 bg-opacity-70" onclick="closeModal('modal-add-executive')"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+            
+            <div class="inline-block w-full max-w-md my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-2xl rounded-2xl relative">
+                <div class="bg-slate-900 text-white px-6 py-4 flex justify-between items-center">
+                    <h3 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-user-plus"></i> 신규 임원진 등록</h3>
+                    <button onclick="closeModal('modal-add-executive')" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <form id="add-executive-form" onsubmit="event.preventDefault(); handleAddExecutiveSubmit();">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">직책</label>
+                                <input type="text" id="ex-role" placeholder="예: 부회장, 총무부장, 감사" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">성명</label>
+                                <input type="text" id="ex-name" placeholder="홍길순" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">학과 및 학기/학번</label>
+                                <input type="text" id="ex-dept" placeholder="예: 국어국문학과 11학번" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">담당 직무 또는 슬로건</label>
+                                <input type="text" id="ex-slogan" placeholder="예: 동문회 재정 투명성과 기부금 관리 담당" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">대표 이미지 설정</label>
+                                <select id="ex-img-preset" onchange="handleExPresetChange(this.value)" class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm bg-white mb-2">
+                                    <option value="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=400">여성 임원 (프로페셔널)</option>
+                                    <option value="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=400">남성 임원 (클래식)</option>
+                                    <option value="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=400">여성 임원 (밝은 톤)</option>
+                                    <option value="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=400">남성 임원 (에너제틱)</option>
+                                    <option value="custom">직접 이미지 URL 주소 입력...</option>
+                                    <option value="upload">📁 내 기기에서 직접 사진 올리기...</option>
+                                </select>
+                                <input type="text" id="ex-img-url" placeholder="https://..." class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 hidden">
+                                <input type="file" id="ex-img-file" accept="image/*" class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 hidden bg-white">
+                            </div>
+                        </div>
+                        <div class="mt-6 flex justify-end space-x-2">
+                            <button type="button" onclick="closeModal('modal-add-executive')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm font-semibold">취소</button>
+                            <button type="submit" class="bg-slate-900 hover:bg-slate-800 text-white px-6 py-2 rounded-lg text-sm font-bold shadow-lg">임원진 등록하기</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ==================== JAVASCRIPT & DATABASE ENGINE ==================== -->
+    <script type="module">
+        // Firebase Modular Libraries (Firebase v11.6.1 as requested)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // APP STATE (Fallback Mock DB in memory ensures fully functioning app if Firebase is loading/offline)
+        let appId = "knou-changwon-alumni";
+        if (typeof __app_id !== 'undefined') {
+            appId = __app_id;
+        }
+
+        let db = null;
+        let auth = null;
+        let currentUser = null; // Active login session details
+        let isAdminMode = false; // Admin Mode flag for editing layouts
+        let editingPostId = null; // Track post being updated
+        let autoLoginMemberId = null; // Track persistent login key across refreshes
+
+        // Fallback local memory state in case Firestore configuration is empty/absent
+        const fallbackDatabase = {
+            members: [
+                { id: "mem1", name: "김홍식", rrn: "650101", dept: "경영학과", phone: "01000000000", signedUpAt: new Date().toISOString(), isAdmin: true },
+                { id: "mem2", name: "이지윤", rrn: "800505", dept: "유아교육과", phone: "01011111111", signedUpAt: new Date().toISOString(), isAdmin: false },
+                { id: "mem3", name: "최영민", rrn: "721111", dept: "컴퓨터과학과", phone: "01022222222", signedUpAt: new Date().toISOString(), isAdmin: false }
+            ],
+            settings: {
+                banner: {
+                    imageUrl: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&q=80&w=1600",
+                    title: "함께 배우고 세상과 나누는\n방송대 창원특례시동문회",
+                    subtitle: "배움의 끝없는 열정으로 뭉친 우리, 창원의 중심에서 소중한 동문 네트워크와 지식의 가치를 실현합니다."
+                },
+                president: {
+                    name: "김 홍 식",
+                    dept: "경영학과 08학번",
+                    imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=800",
+                    title: "\"배움의 날개 아래 모인 소중한 창원 특례시 동문 여러분을 환영합니다!\"",
+                    message: "안녕하십니까. 국립한국방송통신대학교 창원특례시동문회 제12대 회장 김홍식입니다.\n\n우리 방송통신대학교는 끊임없는 열정과 학구열로 가득 찬 특별한 공동체입니다. 낮에는 사회의 기둥으로, 밤에는 학문의 등불을 밝히는 우리 창원의 자랑스러운 동문 여러분의 끈기와 노고에 진심 어린 경의를 표합니다.\n\n본 동문회는 졸업생과 재학생 모두가 소중한 인연을 맺고, 서로의 길을 든든히 격려해 줄 수 있는 따뜻한 쉼터이자 비즈니스의 조력자가 되고자 합니다.\n\n언제나 동문 여러분의 목소리에 귀 기울이며 활기찬 동문회를 만들어 가겠습니다. 감사합니다."
+                }
+            },
+            executives: [
+                { id: "ex1", name: "박상수", role: "수석부회장", dept: "법학과 05학번", slogan: "법률 구조 상담 및 총괄 보좌", imageUrl: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=400" },
+                { id: "ex2", name: "이미경", role: "총무이사", dept: "행정학과 10학번", slogan: "재정 보고, 정기 이벤트 투명 설계 주도", imageUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=400" },
+                { id: "ex3", name: "최재석", role: "기획홍보부장", dept: "미디어영상학과 15학번", slogan: "동문회 소식지 발행 및 홈페이지 관리", imageUrl: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=400" },
+                { id: "ex4", name: "김태연", role: "교육협력감사", dept: "교육학과 09학번", slogan: "재학생 학업 멘토링 프로그램 감사 및 운영", imageUrl: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=400" }
+            ],
+            posts_events: [
+                { id: "evt1", title: "제12대 창원동문회 회장단 이취임식", content: "많은 내외빈 분들과 창원지부 학우님들을 모시고 제12대 이취임식을 성대하게 진행하였습니다. 올 한해 더욱 발전하는 창원동문회가 될 수 있도록 많은 격려 부탁드립니다.", imageUrl: "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&q=80&w=800", author: "기획홍보부장 최재석", authorId: "ex3", date: "2026-06-20", views: 25 },
+                { id: "evt2", title: "방송대 창원지부 춘계 한마음 야유회", content: "마산 무학산 자락에서 오랜만에 자연과 함께 호흡하며 동문간 우애를 돈독히 쌓고 가벼운 등반 후 오찬을 함께 나눈 멋진 날이었습니다.", imageUrl: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=800", author: "회장 김홍식", authorId: "mem1", date: "2026-05-14", views: 42 }
+            ],
+            posts_business: [
+                { id: "biz1", title: "도심 속 힐링 공간 [가배동문 카페]", content: "우리 동문회 소속 생활과학부 12학번 이현주 학우가 직접 구운 수제 쿠키와 핸드드립 커피가 가득한 카페입니다. 창원 동문증 제시하시면 모든 음료 10% 상시 혜택을 드립니다!", extra1: "가배동문 카페 (대표: 이현주)", extra2: "창원 성산구 상남로 12 동문타워 1층 / 055-123-4567", imageUrl: "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&q=80&w=800", author: "이현주", authorId: "mem2", date: "2026-07-02", views: 18 },
+                { id: "biz2", title: "법률 및 특허 사무소 [바른 동행]", content: "법학과 05학번 박상수 수석부회장님이 직접 정성을 다해 세밀한 상담을 드리는 상가, 세무, 민사 전문 사무소입니다. 동문회원들을 대상으로 하는 무료 기초 법률 상담 주간을 운용 중이오니 편히 내방해 주세요.", extra1: "법무법인 바른동행 (대표 변호사: 박상수)", extra2: "창원시 성산구 창원법조단지 4층 / 055-987-6543", imageUrl: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80&w=800", author: "박상수", authorId: "ex1", date: "2026-06-11", views: 33 }
+            ],
+            posts_free: [
+                { id: "fre1", title: "컴퓨터과학과 기말고사 스터디원 모집해요!", content: "성산구 상남동 부근 스터디 카페에서 매주 화요일 저녁 7시에 모여 기말고사 대비 기출문제 풀이 공부를 함께하실 기수 동문이나 학우분 구합니다. 댓글 또는 문자로 편히 연락주세요!", author: "최영민(컴퓨터과학과)", authorId: "mem3", date: "2026-07-16", views: 12 },
+                { id: "fre2", title: "동문회 홈페이지 개설을 진심으로 축하드립니다!!", content: "경남 지역에서 가장 활성화되어 있는 창원특례시동문회인 만큼, 이제 전용 소통 사이트가 생겼으니 더욱 더 끈끈하게 화합하는 계기가 되었으면 참 좋겠습니다. 자주 들어와서 수다 떨게요~", author: "이미경(행정학과)", authorId: "ex2", date: "2026-07-15", views: 29 }
+            ]
+        };
+
+        // Current active state values (Initially synced to mock, then overwritten dynamically if Firebase works)
+        let state = JSON.parse(JSON.stringify(fallbackDatabase));
+
+        // UTILITY: Custom Clean Toast Box instead of browser alerts
+        window.showToast = function(message, type = "success") {
+            const container = document.getElementById("toast-container");
+            const toast = document.createElement("div");
+            toast.className = `flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-2xl border text-sm font-semibold transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto max-w-sm `;
+            
+            if (type === "success") {
+                toast.className += "bg-emerald-50 border-emerald-200 text-emerald-800";
+                toast.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-500 text-lg"></i> <span>${message}</span>`;
+            } else if (type === "error") {
+                toast.className += "bg-rose-50 border-rose-200 text-rose-800";
+                toast.innerHTML = `<i class="fa-solid fa-circle-exclamation text-rose-500 text-lg"></i> <span>${message}</span>`;
+            } else {
+                toast.className += "bg-blue-50 border-blue-200 text-blue-800";
+                toast.innerHTML = `<i class="fa-solid fa-circle-info text-blue-500 text-lg"></i> <span>${message}</span>`;
+            }
+
+            container.appendChild(toast);
+            
+            // Slide/Fade-in animation
+            setTimeout(() => {
+                toast.classList.remove("translate-y-2", "opacity-0");
+            }, 10);
+
+            // Automatic slide/Fade-out and remove
+            setTimeout(() => {
+                toast.classList.add("translate-y-2", "opacity-0");
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 4000);
+        };
+
+        // UTILITY: Custom Confirmation Modal logic instead of browser confirms
+        let confirmCallback = null;
+        window.showConfirm = function(title, message, callback, okThemeClass = "bg-red-600 hover:bg-red-500 text-white") {
+            document.getElementById("confirm-title").textContent = title;
+            document.getElementById("confirm-message").textContent = message;
+            
+            const okBtn = document.getElementById("confirm-ok-btn");
+            okBtn.className = `${okThemeClass} px-5 py-2 rounded-lg text-xs font-bold shadow-lg`;
+            
+            confirmCallback = callback;
+            openModal('modal-confirm');
+        };
+
+        document.getElementById("confirm-cancel-btn").onclick = function() {
+            closeModal('modal-confirm');
+            confirmCallback = null;
+        };
+
+        document.getElementById("confirm-ok-btn").onclick = function() {
+            closeModal('modal-confirm');
+            if (confirmCallback) {
+                confirmCallback();
+            }
+            confirmCallback = null;
+        };
+
+        // INITIALIZE FIREBASE SYSTEM (If available)
+        let isFirebaseActive = false;
+        try {
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                const firebaseConfig = JSON.parse(__firebase_config);
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                isFirebaseActive = true;
+                console.log("Firebase initialized successfully.");
+            }
+        } catch (e) {
+            console.error("Firebase Initialization failed. Running in-memory mode.", e);
+        }
+
+        // Session Restoration - checks auth and fires persistent search
+        function attemptAutoLogin() {
+            if (autoLoginMemberId && state.members.length) {
+                const member = state.members.find(m => m.id === autoLoginMemberId);
+                if (member) {
+                    handleUserLoginSuccess(member);
+                    showToast(`${member.name} 동문님, 이전 세션에서 자동 로그인되었습니다.`, "success");
+                }
+                autoLoginMemberId = null; // Only run once
+            }
+        }
+
+        // Authentication Orchestration
+        async function authenticateAndInit() {
+            if (!isFirebaseActive) {
+                showToast("인터넷 모의 데모 모드로 연결되어 있습니다. 기능은 정상 작동합니다.", "info");
+                loadAllDynamicContent();
+                return;
+            }
+
+            try {
+                // Rule 3: Auth Before Queries - authenticate first
+                let userCredential;
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    userCredential = await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    userCredential = await signInAnonymously(auth);
+                }
+                const user = userCredential.user;
+                console.log("Authenticated as:", user.uid);
+                
+                // Set up listeners/loaders
+                onAuthStateChanged(auth, async (loggedUser) => {
+                    if (loggedUser) {
+                        console.log("Auth State Changed: active user ID is", loggedUser.uid);
+                        
+                        // Restore persisted login session details from Firestore
+                        const userId = loggedUser.uid;
+                        try {
+                            const sessionDoc = await getDoc(doc(db, 'artifacts', appId, 'users', userId, 'session', 'active'));
+                            if (sessionDoc.exists()) {
+                                const sessionData = sessionDoc.data();
+                                autoLoginMemberId = sessionData.memberId;
+                                attemptAutoLogin();
+                            }
+                        } catch (e) {
+                            console.error("Failed to restore session doc:", e);
+                        }
+                    }
+                });
+
+                // Establish Realtime Firestore syncing on collections
+                setupFirestoreSyncing();
+
+            } catch (err) {
+                console.error("Authentication or Firestore setup failed. Falling back to offline mode.", err);
+                showToast("데이터베이스 서버 연동 오류로 데모 모드로 작동합니다.", "error");
+                loadAllDynamicContent();
+            }
+        }
+
+        // FIRESTORE STREAMS (Realtime Sync following Rule 1 & Rule 2)
+        function setupFirestoreSyncing() {
+            if (!db || !isFirebaseActive) return;
+
+            // 1. Settings (Banner and President)
+            onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'homepage'), (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    state.settings.banner = data.banner || fallbackDatabase.settings.banner;
+                    state.settings.president = data.president || fallbackDatabase.settings.president;
+                } else {
+                    // Seed initial layout if empty
+                    setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'homepage'), fallbackDatabase.settings);
+                }
+                applyBannerState();
+                applyPresidentState();
+            }, (err) => {
+                console.error("Settings snapshot failed:", err);
+            });
+
+            // 2. Members List (Seeding fallback members strictly ONCE when collection is completely empty)
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'members'), (querySnapshot) => {
+                const list = [];
+                querySnapshot.forEach(docSnap => {
+                    list.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                
+                if (querySnapshot.empty) {
+                    // Seed default fallback members only once if collection is completely brand new/empty
+                    fallbackDatabase.members.forEach(fallbackMem => {
+                        setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', fallbackMem.id), fallbackMem)
+                            .catch(e => console.error("Error seeding member:", e));
+                    });
+                    state.members = fallbackDatabase.members;
+                } else {
+                    state.members = list;
+                }
+                
+                // Keep currentUser session synced with DB updates (especially isAdmin role toggling)
+                if (currentUser) {
+                    const matched = state.members.find(m => m.id === currentUser.id || (m.phone === currentUser.phone && m.name === currentUser.name));
+                    if (matched) {
+                        currentUser = matched;
+                        updateAdminUIStatus();
+                    }
+                }
+                
+                attemptAutoLogin(); // Attempt auto-login when members are pulled
+                updateStats();
+                renderAdminMembers();
+            }, (err) => {
+                console.error("Members snapshot failed:", err);
+            });
+
+            // 3. Executives List
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'executives'), (querySnapshot) => {
+                const list = [];
+                querySnapshot.forEach(docSnap => {
+                    list.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                state.executives = list.length ? list : fallbackDatabase.executives;
+                renderExecutives();
+            }, (err) => {
+                console.error("Executives snapshot failed:", err);
+            });
+
+            // 4. Events Posts
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'posts_events'), (querySnapshot) => {
+                const list = [];
+                querySnapshot.forEach(docSnap => {
+                    list.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                state.posts_events = list.length ? list : fallbackDatabase.posts_events;
+                // Rule 2: Sort in Javascript memory instead of Firestore orderBy
+                state.posts_events.sort((a, b) => new Date(b.date) - new Date(a.date));
+                renderEventsBoard();
+                renderHomePreviews();
+                updateStats();
+            }, (err) => {
+                console.error("Events snapshot failed:", err);
+            });
+
+            // 5. Business Posts
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'posts_business'), (querySnapshot) => {
+                const list = [];
+                querySnapshot.forEach(docSnap => {
+                    list.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                state.posts_business = list.length ? list : fallbackDatabase.posts_business;
+                state.posts_business.sort((a, b) => new Date(b.date) - new Date(a.date));
+                renderBusinessBoard();
+                renderHomePreviews();
+                updateStats();
+            }, (err) => {
+                console.error("Business snapshot failed:", err);
+            });
+
+            // 6. Free Posts
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'posts_free'), (querySnapshot) => {
+                const list = [];
+                querySnapshot.forEach(docSnap => {
+                    list.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                state.posts_free = list.length ? list : fallbackDatabase.posts_free;
+                state.posts_free.sort((a, b) => new Date(b.date) - new Date(a.date));
+                renderFreeBoard();
+                renderHomePreviews();
+                updateStats();
+            }, (err) => {
+                console.error("Free snapshot failed:", err);
+            });
+        }
+
+        // OFFLINE BACKUP LOADER
+        function loadAllDynamicContent() {
+            applyBannerState();
+            applyPresidentState();
+            renderExecutives();
+            renderEventsBoard();
+            renderBusinessBoard();
+            renderFreeBoard();
+            renderHomePreviews();
+            updateStats();
+            renderAdminMembers();
+        }
+
+        // STATS AND METRICS CALCULATOR
+        function updateStats() {
+            document.getElementById("stats-members-count").textContent = state.members.length;
+            document.getElementById("stats-events-count").textContent = state.posts_events.length;
+            document.getElementById("stats-business-count").textContent = state.posts_business.length;
+            document.getElementById("stats-free-count").textContent = state.posts_free.length;
+
+            // Update Admin Dashboard Stats
+            document.getElementById("member-total-count").textContent = state.members.length;
+            document.getElementById("member-admin-count").textContent = state.members.filter(m => m.isAdmin).length;
+        }
+
+        // BANNER APPLICATION
+        function applyBannerState() {
+            const banner = state.settings.banner;
+            document.getElementById("main-banner-img").src = banner.imageUrl || "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&q=80&w=1600";
+            document.getElementById("main-banner-title").innerHTML = (banner.title || "").replace(/\n/g, "<br>");
+            document.getElementById("main-banner-subtitle").textContent = banner.subtitle || "";
+
+            // Fill inputs in Admin Editor Panel for easy change
+            document.getElementById("admin-banner-custom-url").value = banner.imageUrl || "";
+            document.getElementById("admin-banner-title-input").value = banner.title || "";
+            document.getElementById("admin-banner-subtitle-input").value = banner.subtitle || "";
+        }
+
+        // PRESIDENT APPLICATION
+        function applyPresidentState() {
+            const pres = state.settings.president;
+            document.getElementById("president-display-img").src = pres.imageUrl || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=800";
+            document.getElementById("president-display-name").textContent = pres.name || "";
+            document.getElementById("president-display-dept").textContent = pres.dept || "";
+            document.getElementById("president-display-title").textContent = pres.title || "";
+            document.getElementById("president-display-message").textContent = pres.message || "";
+
+            // Populate form fields
+            document.getElementById("ep-name").value = pres.name || "";
+            document.getElementById("ep-dept").value = pres.dept || "";
+            document.getElementById("ep-img").value = pres.imageUrl || "";
+            document.getElementById("ep-title").value = pres.title || "";
+            document.getElementById("ep-message").value = pres.message || "";
+        }
+
+        // INTRO PAGE: RENDER EXECUTIVE STAFF
+        function renderExecutives() {
+            const container = document.getElementById("executive-grid");
+            container.innerHTML = "";
+
+            state.executives.forEach(ex => {
+                const card = document.createElement("div");
+                card.className = "bg-white rounded-3xl shadow-md border border-slate-200 overflow-hidden text-center hover:shadow-xl transition duration-300 relative group flex flex-col justify-between h-96";
+                
+                let adminDeleteBtn = "";
+                if (isAdminMode) {
+                    adminDeleteBtn = `
+                        <button onclick="handleDeleteExecutive('${ex.id}')" class="absolute top-4 right-4 bg-red-600 hover:bg-red-700 text-white p-2 rounded-full shadow-lg transition z-10" title="임원 삭제">
+                            <i class="fa-solid fa-trash-can text-sm"></i>
+                        </button>
+                    `;
+                }
+
+                card.innerHTML = `
+                    ${adminDeleteBtn}
+                    <div class="h-48 overflow-hidden bg-slate-100 relative">
+                        <img src="${ex.imageUrl || 'https://placehold.co/300x300/e2e8f0/64748b?text=Photo'}" alt="${ex.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/60 to-transparent h-12"></div>
+                    </div>
+                    <div class="p-5 flex-grow flex flex-col justify-between">
+                        <div>
+                            <span class="inline-block bg-blue-100 text-blue-900 text-xs font-black px-2.5 py-1 rounded-full mb-2">${ex.role}</span>
+                            <h4 class="text-lg font-bold text-slate-900">${ex.name}</h4>
+                            <p class="text-xs text-amber-600 font-semibold mb-3">${ex.dept}</p>
+                        </div>
+                        <p class="text-xs text-slate-500 italic bg-slate-50 p-3 rounded-xl border border-slate-100 line-clamp-2">${ex.slogan}</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // EVENTS GALLERY BOARD
+        function renderEventsBoard() {
+            const container = document.getElementById("board-events-grid");
+            container.innerHTML = "";
+
+            if (!state.posts_events.length) {
+                container.innerHTML = `
+                    <div class="col-span-full py-16 text-center text-slate-400 bg-white border border-dashed rounded-3xl">
+                        <i class="fa-solid fa-camera text-4xl mb-3 text-slate-300"></i>
+                        <p class="text-sm">아직 등록된 공식 행사 사진이 없습니다.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            state.posts_events.forEach(post => {
+                const card = document.createElement("div");
+                card.className = "bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-xl transition duration-300 cursor-pointer flex flex-col justify-between h-[420px]";
+                card.onclick = () => viewPostDetail('events', post.id);
+
+                card.innerHTML = `
+                    <div class="h-52 overflow-hidden bg-slate-100 relative">
+                        <img src="${post.imageUrl || 'https://placehold.co/400x200/e2e8f0/64748b?text=KNOU'}" alt="${post.title}" class="w-full h-full object-cover">
+                        <div class="absolute top-4 right-4 bg-black/60 text-white text-[11px] font-bold px-2 py-1 rounded">
+                            ${post.date}
+                        </div>
+                    </div>
+                    <div class="p-6 flex-grow flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-extrabold text-slate-900 text-base sm:text-lg mb-2 line-clamp-1 hover:text-blue-900 transition">${post.title}</h3>
+                            <p class="text-slate-500 text-xs sm:text-sm line-clamp-3 leading-relaxed mb-4">${post.content}</p>
+                        </div>
+                        <div class="flex items-center justify-between pt-4 border-t border-slate-100 text-xs text-slate-400">
+                            <span class="font-medium text-slate-600"><i class="fa-solid fa-user-check text-blue-900 mr-1"></i> ${post.author}</span>
+                            <span>조회수 ${post.views || 0}</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // ALUMNI BUSINESS BOARD
+        function renderBusinessBoard() {
+            const container = document.getElementById("board-business-grid");
+            container.innerHTML = "";
+
+            if (!state.posts_business.length) {
+                container.innerHTML = `
+                    <div class="col-span-full py-16 text-center text-slate-400 bg-white border border-dashed rounded-3xl">
+                        <i class="fa-solid fa-shop text-4xl mb-3 text-slate-300"></i>
+                        <p class="text-sm">아직 동문들의 사업장 소개 글이 없습니다. 최초 사업장이 되어 보세요!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            state.posts_business.forEach(post => {
+                const card = document.createElement("div");
+                card.className = "bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-xl transition duration-300 cursor-pointer flex flex-col justify-between h-[460px]";
+                card.onclick = () => viewPostDetail('business', post.id);
+
+                card.innerHTML = `
+                    <div class="h-48 overflow-hidden bg-slate-100 relative">
+                        <img src="${post.imageUrl || 'https://placehold.co/400x200/e2e8f0/64748b?text=Shop'}" alt="${post.title}" class="w-full h-full object-cover">
+                        <div class="absolute top-4 right-4 bg-emerald-600 text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded shadow">
+                            동문 파트너십
+                        </div>
+                    </div>
+                    <div class="p-6 flex-grow flex flex-col justify-between">
+                        <div>
+                            <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100 inline-block mb-2 line-clamp-1"><i class="fa-solid fa-store mr-1"></i> ${post.extra1}</span>
+                            <h3 class="font-extrabold text-slate-900 text-base sm:text-lg mb-2 line-clamp-1 hover:text-emerald-700 transition">${post.title}</h3>
+                            <p class="text-slate-500 text-xs sm:text-sm line-clamp-2 leading-relaxed mb-4">${post.content}</p>
+                        </div>
+                        <div>
+                            <div class="bg-slate-50 p-2.5 rounded-xl text-[11px] text-slate-500 mb-4 border border-slate-100 line-clamp-1 flex items-center gap-1.5">
+                                <i class="fa-solid fa-location-dot text-rose-500"></i>
+                                <span>${post.extra2}</span>
+                            </div>
+                            <div class="flex items-center justify-between pt-3 border-t border-slate-100 text-xs text-slate-400">
+                                <span class="font-medium text-slate-600"><i class="fa-solid fa-user-circle text-slate-400 mr-1"></i> ${post.author}</span>
+                                <span>조회수 ${post.views || 0}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // FREE BOARD (Table board style)
+        function renderFreeBoard() {
+            const tbody = document.getElementById("board-free-tbody");
+            tbody.innerHTML = "";
+
+            if (!state.posts_free.length) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-6 py-16 text-center text-slate-400">
+                            <i class="fa-solid fa-comments text-3xl mb-2 text-slate-300"></i>
+                            <p class="text-sm">작성된 소통 게시글이 없습니다. 첫 글의 주인공이 되어 보세요!</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            state.posts_free.forEach((post, index) => {
+                const tr = document.createElement("tr");
+                tr.className = "hover:bg-slate-50 cursor-pointer transition";
+                tr.onclick = () => viewPostDetail('free', post.id);
+
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-center text-xs font-bold text-slate-400">${index + 1}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-slate-950 font-bold hover:text-blue-900 transition max-w-xs truncate">${post.title}</td>
+                    <td class="px-6 py-4 whitespace-nowrap font-medium text-slate-700 text-xs sm:text-sm">${post.author}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center text-xs text-slate-400">${post.views || 0}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center text-xs text-slate-500">${post.date}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // MEMBER MANAGEMENT: Render registered alumni members
+        window.renderAdminMembers = function() {
+            const tbody = document.getElementById("admin-members-tbody");
+            if (!tbody) return;
+
+            tbody.innerHTML = "";
+
+            if (!state.members.length) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="px-6 py-16 text-center text-slate-400">
+                            <i class="fa-solid fa-user-slash text-3xl mb-2 text-slate-300"></i>
+                            <p class="text-sm">가입한 동문 회원이 존재하지 않습니다.</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            // Create loop
+            state.members.forEach(member => {
+                const signupDate = member.signedUpAt ? member.signedUpAt.split('T')[0] : "이전";
+                const tr = document.createElement("tr");
+                tr.className = "hover:bg-slate-50 transition";
+                tr.id = `member-row-${member.id}`;
+
+                const adminBadgeClass = member.isAdmin 
+                    ? "bg-red-100 text-red-800 border-red-200" 
+                    : "bg-slate-100 text-slate-600 border-slate-200";
+                
+                const adminActionText = member.isAdmin ? "권한 회수" : "권한 위임";
+                const adminActionIcon = member.isAdmin ? "fa-user-minus" : "fa-user-shield";
+                const adminActionBtnClass = member.isAdmin 
+                    ? "bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200" 
+                    : "bg-red-50 hover:bg-red-100 text-red-700 border-red-200";
+
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-500">${signupDate}</td>
+                    <td class="px-6 py-4 whitespace-nowrap font-extrabold text-slate-900">${member.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap font-semibold text-xs text-blue-900">${member.dept}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-slate-600 text-xs">${member.rrn || '------'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-slate-600 text-xs font-mono">${member.phone}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-black border ${adminBadgeClass}">
+                            ${member.isAdmin ? '총괄관리자' : '일반회원'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center text-xs flex justify-center items-center gap-2">
+                        <button onclick="openEditMemberModal('${member.id}')" class="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-bold transition flex items-center gap-1">
+                            <i class="fa-solid fa-user-pen"></i> <span>수정</span>
+                        </button>
+                        <button onclick="handleToggleAdminPrivilege('${member.id}', ${member.isAdmin})" class="px-3 py-1.5 rounded-lg border font-bold transition flex items-center gap-1 ${adminActionBtnClass}">
+                            <i class="fa-solid ${adminActionIcon}"></i> <span>${adminActionText}</span>
+                        </button>
+                        <button onclick="handleDeleteMember('${member.id}')" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 font-bold transition flex items-center gap-1">
+                            <i class="fa-solid fa-user-xmark"></i> <span>탈퇴</span>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        };
+
+        // MEMBER MANAGEMENT: Search Filtering
+        window.filterMembersList = function() {
+            const queryVal = document.getElementById("member-search-input").value.toLowerCase().trim();
+            const rows = document.querySelectorAll("#admin-members-tbody tr");
+
+            rows.forEach(row => {
+                if (row.cells.length < 5) return; // skip empty list template row
+                
+                const name = row.cells[1].textContent.toLowerCase();
+                const dept = row.cells[2].textContent.toLowerCase();
+                const phone = row.cells[4].textContent.toLowerCase();
+
+                if (name.includes(queryVal) || dept.includes(queryVal) || phone.includes(queryVal)) {
+                    row.classList.remove("hidden");
+                } else {
+                    row.classList.add("hidden");
+                }
+            });
+        };
+
+        // MEMBER MANAGEMENT: Open Edit Modal
+        window.openEditMemberModal = function(memberId) {
+            const member = state.members.find(m => m.id === memberId);
+            if (!member) return;
+
+            document.getElementById("em-id").value = member.id;
+            document.getElementById("em-name").value = member.name || "";
+            document.getElementById("em-rrn").value = member.rrn || "";
+            document.getElementById("em-dept").value = member.dept || "";
+            document.getElementById("em-phone").value = member.phone || "";
+            document.getElementById("em-is-admin").checked = !!member.isAdmin;
+
+            openModal('modal-edit-member');
+        };
+
+        // MEMBER MANAGEMENT: Handle Edit Submit
+        window.handleEditMemberSubmit = async function() {
+            const memberId = document.getElementById("em-id").value;
+            const name = document.getElementById("em-name").value.trim();
+            const rrn = document.getElementById("em-rrn").value.trim();
+            const dept = document.getElementById("em-dept").value;
+            const phone = document.getElementById("em-phone").value.trim();
+            const isAdmin = document.getElementById("em-is-admin").checked;
+
+            if (!name || rrn.length !== 6 || !dept || phone.length < 10) {
+                showToast("모든 회원정보 양식을 알맞게 입력해 주세요.", "error");
+                return;
+            }
+
+            const memberIndex = state.members.findIndex(m => m.id === memberId);
+            if (memberIndex === -1) return;
+
+            // Maintain existing fields while updating modified ones
+            const updatedMember = {
+                ...state.members[memberIndex],
+                name,
+                rrn,
+                dept,
+                phone,
+                isAdmin
+            };
+
+            try {
+                if (isFirebaseActive && db) {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'members', memberId);
+                    await setDoc(docRef, updatedMember, { merge: true });
+                } else {
+                    state.members[memberIndex] = updatedMember;
+                }
+
+                showToast(`${name} 동문의 회원 정보가 수정되었습니다.`, "success");
+                closeModal('modal-edit-member');
+
+                // If editing self, update header display & active session
+                if (currentUser && currentUser.id === memberId) {
+                    currentUser = updatedMember;
+                    handleUserLoginSuccess(currentUser);
+                }
+
+                updateStats();
+                renderAdminMembers();
+            } catch (err) {
+                console.error("Failed to update member info:", err);
+                showToast("회원 정보 수정 도중 오류가 발생했습니다.", "error");
+            }
+        };
+
+        // MEMBER MANAGEMENT: Toggle Admin Role
+        window.handleToggleAdminPrivilege = function(memberId, currentStatus) {
+            const member = state.members.find(m => m.id === memberId);
+            if (!member) return;
+
+            // Block self-revocation of admin rights to prevent getting locked out
+            if (currentUser && currentUser.name === member.name && currentUser.phone === member.phone && currentStatus === true) {
+                showToast("자기 자신의 관리자 권한은 해제할 수 없습니다.", "error");
+                return;
+            }
+
+            const promptMsg = `${member.name} 동문에게 총괄 관리자 권한을 ${currentStatus ? '회수' : '부여'}하시겠습니까?`;
+            
+            showConfirm("관리자 권한 변경", promptMsg, async () => {
+                try {
+                    if (isFirebaseActive && db) {
+                        const memberDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'members', memberId);
+                        await updateDoc(memberDocRef, { isAdmin: !currentStatus });
+                    } else {
+                        const idx = state.members.findIndex(m => m.id === memberId);
+                        if (idx !== -1) {
+                            state.members[idx].isAdmin = !currentStatus;
+                        }
+                    }
+
+                    showToast(`${member.name} 동문의 권한 설정이 정상적으로 업데이트되었습니다.`, "success");
+                    
+                    // Trigger immediate refresh
+                    updateStats();
+                    renderAdminMembers();
+                } catch (err) {
+                    console.error("Failed to toggle privilege:", err);
+                    showToast("권한 설정 업데이트에 실패했습니다.", "error");
+                }
+            });
+        };
+
+        // MEMBER MANAGEMENT: Delete Member Profile
+        window.handleDeleteMember = function(memberId) {
+            const member = state.members.find(m => m.id === memberId);
+            if (!member) return;
+
+            if (currentUser && currentUser.name === member.name && currentUser.phone === member.phone) {
+                showToast("현재 로그인된 계정은 탈퇴 처리할 수 없습니다.", "error");
+                return;
+            }
+
+            const promptMsg = `${member.name} 동문의 회원 기록을 영구 삭제하고 동문회에서 탈퇴 처리하시겠습니까?`;
+
+            showConfirm("동문 영구 탈퇴", promptMsg, async () => {
+                try {
+                    if (isFirebaseActive && db) {
+                        const memberDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'members', memberId);
+                        await deleteDoc(memberDocRef);
+                    } else {
+                        state.members = state.members.filter(m => m.id !== memberId);
+                    }
+
+                    showToast(`${member.name} 동문이 탈퇴 처리되었습니다.`, "info");
+                    
+                    updateStats();
+                    renderAdminMembers();
+                } catch (err) {
+                    console.error("Failed to delete member:", err);
+                    showToast("회원 탈퇴 처리에 실패했습니다.", "error");
+                }
+            });
+        };
+
+        // HOME MINI PREVIEWS (Right, Center, Left panels)
+        function renderHomePreviews() {
+            // 1. Events Preview (Left)
+            const evContainer = document.getElementById("home-event-preview-container");
+            evContainer.innerHTML = "";
+            const recentEvents = state.posts_events.slice(0, 1);
+            if (recentEvents.length) {
+                recentEvents.forEach(e => {
+                    evContainer.innerHTML = `
+                        <div class="cursor-pointer group" onclick="navigateTo('board-events')">
+                            <div class="h-28 rounded-xl overflow-hidden mb-3 relative">
+                                <img src="${e.imageUrl}" alt="preview" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                            </div>
+                            <h4 class="font-bold text-slate-900 text-sm group-hover:underline line-clamp-1">${e.title}</h4>
+                            <p class="text-slate-500 text-xs line-clamp-2 mt-1">${e.content}</p>
+                        </div>
+                    `;
+                });
+            } else {
+                evContainer.innerHTML = `<p class="text-slate-400 text-xs text-center py-12">등록된 행사가 없습니다.</p>`;
+            }
+
+            // 2. Business Preview (Center)
+            const bizContainer = document.getElementById("home-business-preview-container");
+            bizContainer.innerHTML = "";
+            const recentBiz = state.posts_business.slice(0, 1);
+            if (recentBiz.length) {
+                recentBiz.forEach(b => {
+                    bizContainer.innerHTML = `
+                        <div class="cursor-pointer group" onclick="navigateTo('board-business')">
+                            <div class="h-28 rounded-xl overflow-hidden mb-3 relative">
+                                <img src="${b.imageUrl}" alt="preview" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                            </div>
+                            <span class="text-[10px] font-black text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">${b.extra1}</span>
+                            <h4 class="font-bold text-slate-900 text-sm group-hover:underline line-clamp-1 mt-1.5">${b.title}</h4>
+                        </div>
+                    `;
+                });
+            } else {
+                bizContainer.innerHTML = `<p class="text-slate-400 text-xs text-center py-12">등록된 동문 상호가 없습니다.</p>`;
+            }
+
+            // 3. Free Preview (Right)
+            const freeContainer = document.getElementById("home-free-preview-container");
+            freeContainer.innerHTML = "";
+            const recentFree = state.posts_free.slice(0, 4);
+            if (recentFree.length) {
+                recentFree.forEach(f => {
+                    const block = document.createElement("div");
+                    block.className = "py-2.5 cursor-pointer group flex justify-between items-center text-xs";
+                    block.onclick = () => navigateTo('board-free');
+                    block.innerHTML = `
+                        <span class="text-slate-800 group-hover:underline font-semibold max-w-[180px] truncate">${f.title}</span>
+                        <span class="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded shrink-0">${f.author.split('(')[0]}</span>
+                    `;
+                    freeContainer.appendChild(block);
+                });
+            } else {
+                freeContainer.innerHTML = `<p class="text-slate-400 text-xs text-center py-12">작성된 소담글이 없습니다.</p>`;
+            }
+        }
+
+        // AUTH OPERATIONS: 회원가입 (SIGN UP SUBMIT)
+        window.handleSignupSubmit = async function() {
+            const name = document.getElementById("su-name").value.trim();
+            const rrn = document.getElementById("su-rrn").value.trim();
+            const dept = document.getElementById("su-dept").value;
+            const phone = document.getElementById("su-phone").value.trim();
+
+            if (!name || rrn.length !== 6 || !dept || phone.length < 10) {
+                showToast("모든 회원가입 양식을 알맞게 구성해 주세요.", "error");
+                return;
+            }
+
+            // Check duplicate first in JS
+            const isDuplicate = state.members.some(m => m.name === name && m.phone === phone);
+            if (isDuplicate) {
+                showToast("이미 등록되어 있는 회원 정보입니다. 로그인해 주세요.", "error");
+                return;
+            }
+
+            const newId = "mem_" + Math.random().toString(36).substring(2, 9);
+            const newMember = {
+                id: newId,
+                name,
+                rrn,
+                dept,
+                phone,
+                signedUpAt: new Date().toISOString(),
+                isAdmin: false // Defaults to normal user profile
+            };
+
+            try {
+                if (isFirebaseActive && db) {
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'members', newId), newMember);
+                    
+                    // Persist user login session securely on signup
+                    if (auth.currentUser) {
+                        const userId = auth.currentUser.uid;
+                        await setDoc(doc(db, 'artifacts', appId, 'users', userId, 'session', 'active'), {
+                            memberId: newId,
+                            loggedInAt: new Date().toISOString()
+                        });
+                    }
+                } else {
+                    state.members.push(newMember);
+                    updateStats();
+                    renderAdminMembers();
+                }
+
+                showToast(`환영합니다! ${name} 동문님, 회원가입이 완료되었습니다.`, "success");
+                closeModal('modal-signup');
+                
+                // Automate logged-in state right after joining
+                handleUserLoginSuccess(newMember);
+                document.getElementById("signup-form").reset();
+            } catch (err) {
+                console.error("Signup failed:", err);
+                showToast("가입 중 전송 오류가 발생하였습니다.", "error");
+            }
+        };
+
+        // AUTH OPERATIONS: 로그인 (LOGIN SUBMIT WITH PERSISTENCE)
+        window.handleLoginSubmit = async function() {
+            const name = document.getElementById("li-name").value.trim();
+            const phone = document.getElementById("li-phone").value.trim();
+
+            if (!name || !phone) {
+                showToast("인증 세션을 채우기 위한 정보를 입력해 주세요.", "error");
+                return;
+            }
+
+            // Match query in current state members
+            const member = state.members.find(m => m.name === name && m.phone === phone);
+
+            if (member) {
+                handleUserLoginSuccess(member);
+                showToast(`${name} 동문님, 반갑습니다! 안전하게 확인 및 로그인되었습니다.`, "success");
+                closeModal('modal-login');
+                document.getElementById("login-form").reset();
+                
+                // Persist user login session details safely inside user collection (Rule 1 Compliant)
+                if (isFirebaseActive && db && auth.currentUser) {
+                    try {
+                        const userId = auth.currentUser.uid;
+                        await setDoc(doc(db, 'artifacts', appId, 'users', userId, 'session', 'active'), {
+                            memberId: member.id,
+                            loggedInAt: new Date().toISOString()
+                        });
+                    } catch (e) {
+                        console.error("Failed to write persisted login token:", e);
+                    }
+                }
+            } else {
+                showToast("일치하는 회원 정보가 존재하지 않습니다. 회원가입을 완료해 주세요.", "error");
+            }
+        };
+
+        // ADMIN MODE TRIGGER
+        window.toggleAdminMode = function() {
+            if (isAdminMode) {
+                isAdminMode = false;
+                updateAdminUIStatus();
+                showToast("관리자 기능 권한이 비활성화되었습니다.", "info");
+                
+                // If on admin member page, route back to home
+                const adminSection = document.getElementById("section-admin-members");
+                if (adminSection && !adminSection.classList.contains("hidden")) {
+                    navigateTo('home');
+                }
+            } else {
+                document.getElementById("ap-password").value = "";
+                openModal('modal-admin-password');
+            }
+        };
+
+        window.submitAdminPassword = function() {
+            const password = document.getElementById("ap-password").value;
+            if (password === "1219") {
+                isAdminMode = true;
+                
+                // Auto login as default admin if no user logged in to prevent empty user state issues
+                if (!currentUser) {
+                    const masterAdmin = state.members.find(m => m.isAdmin) || {
+                        id: "mem1",
+                        name: "김홍식",
+                        dept: "경영학과",
+                        phone: "01000000000",
+                        isAdmin: true
+                    };
+                    handleUserLoginSuccess(masterAdmin);
+                } else {
+                    currentUser.isAdmin = true;
+                    updateAdminUIStatus();
+                }
+                
+                showToast("관리자 인증 성공! 동문회 편집 권한이 안전하게 부여되었습니다.", "success");
+                closeModal('modal-admin-password');
+            } else {
+                showToast("비밀번호가 일치하지 않습니다. 다시 입력해주세요.", "error");
+            }
+            document.getElementById("admin-password-form").reset();
+        };
+
+        // Update Admin Layout Visual elements according to current isAdminMode
+        function updateAdminUIStatus() {
+            const btn = document.getElementById("admin-indicator-btn");
+            const text = document.getElementById("admin-mode-text");
+            const adminElements = document.querySelectorAll(".admin-only");
+
+            // Verify if currentUser is still an admin
+            if (currentUser && !currentUser.isAdmin && isAdminMode) {
+                isAdminMode = false;
+                showToast("관리자 권한이 만료되어 관리자 모드가 해제됩니다.", "info");
+            }
+
+            if (isAdminMode) {
+                btn.className = "bg-amber-400 hover:bg-amber-300 text-blue-900 text-xs px-3 py-1.5 rounded-lg border border-amber-300 font-bold flex items-center gap-1 shadow-lg";
+                text.textContent = "관리자 모드 켜짐";
+                adminElements.forEach(el => el.classList.remove("hidden"));
+            } else {
+                btn.className = "bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs px-3 py-1.5 rounded-lg border border-slate-600 font-semibold flex items-center gap-1";
+                text.textContent = "관리자 모드 켜기";
+                adminElements.forEach(el => el.classList.add("hidden"));
+            }
+
+            renderExecutives(); // Re-render elements that depend on admin status
+        }
+
+        // LOGIN SUCCESS ACTION
+        function handleUserLoginSuccess(member) {
+            currentUser = member;
+            
+            // Header User Interface Update
+            document.getElementById("user-profile-bar").classList.remove("hidden");
+            document.getElementById("user-profile-bar").classList.add("flex");
+            document.getElementById("header-user-dept").textContent = member.dept;
+            document.getElementById("header-user-name").textContent = `${member.name} 동문`;
+
+            document.getElementById("mobile-user-profile-bar").classList.remove("hidden");
+            document.getElementById("m-header-user-dept").textContent = member.dept;
+            document.getElementById("m-header-user-name").textContent = `${member.name} 동문`;
+
+            // Hide Guest view
+            document.getElementById("guest-profile-bar").classList.add("hidden");
+            document.getElementById("mobile-guest-profile-bar").classList.add("hidden");
+
+            // Sync Admin privileges visually
+            updateAdminUIStatus();
+        }
+
+        // LOGOUT ACTION (DELETES REFRESH SESSION DETAILED DATA)
+        window.handleLogout = async function() {
+            // Delete persistent session on manual logout
+            if (isFirebaseActive && db && auth.currentUser) {
+                try {
+                    const userId = auth.currentUser.uid;
+                    await deleteDoc(doc(db, 'artifacts', appId, 'users', userId, 'session', 'active'));
+                } catch (e) {
+                    console.error("Failed to delete login state:", e);
+                }
+            }
+
+            currentUser = null;
+            isAdminMode = false;
+            
+            document.getElementById("user-profile-bar").classList.add("hidden");
+            document.getElementById("user-profile-bar").classList.remove("flex");
+            document.getElementById("mobile-user-profile-bar").classList.add("hidden");
+
+            document.getElementById("guest-profile-bar").classList.remove("hidden");
+            document.getElementById("mobile-guest-profile-bar").classList.remove("hidden");
+
+            updateAdminUIStatus();
+            navigateTo('home');
+
+            showToast("안전하게 로그아웃 되었습니다.", "info");
+        };
+
+        // BANNER PRESET SELECTOR
+        window.changeBannerPreset = function(val) {
+            const customUrlInput = document.getElementById("admin-banner-custom-url");
+            if (val === "custom") {
+                customUrlInput.classList.remove("hidden");
+                customUrlInput.value = "";
+            } else {
+                customUrlInput.classList.add("hidden");
+                customUrlInput.value = val;
+            }
+        };
+
+        window.openEditPresidentModal = function() {
+            const pres = state.settings.president;
+            document.getElementById("ep-name").value = pres.name || "";
+            document.getElementById("ep-dept").value = pres.dept || "";
+            document.getElementById("ep-title").value = pres.title || "";
+            document.getElementById("ep-message").value = pres.message || "";
+            
+            const imgVal = pres.imageUrl || "";
+            const select = document.getElementById("ep-img-preset");
+            const input = document.getElementById("ep-img");
+            const fileInput = document.getElementById("ep-img-file");
+            
+            const isPreset = Array.from(select.options).some(opt => opt.value === imgVal);
+            
+            fileInput.classList.add("hidden");
+            if (isPreset) {
+                select.value = imgVal;
+                input.classList.add("hidden");
+                input.value = imgVal;
+            } else if (imgVal.startsWith("data:image/")) {
+                select.value = "upload";
+                input.classList.add("hidden");
+                input.value = imgVal;
+                fileInput.classList.remove("hidden");
+            } else {
+                select.value = "custom";
+                input.classList.remove("hidden");
+                input.value = imgVal;
+            }
+            
+            openModal('modal-edit-president');
+        };
+
+        window.handleEpPresetChange = function(val) {
+            const customUrl = document.getElementById("ep-img");
+            const fileInput = document.getElementById("ep-img-file");
+            
+            if (val === "custom") {
+                customUrl.classList.remove("hidden");
+                fileInput.classList.add("hidden");
+                customUrl.value = "";
+            } else if (val === "upload") {
+                customUrl.classList.add("hidden");
+                fileInput.classList.remove("hidden");
+                fileInput.value = "";
+                customUrl.value = "";
+            } else {
+                customUrl.classList.add("hidden");
+                fileInput.classList.add("hidden");
+                customUrl.value = val;
+            }
+        };
+
+        // BANNER SAVE SETTINGS
+        window.saveBannerSettings = async function() {
+            const selectVal = document.getElementById("admin-banner-select").value;
+            let imgUrl = "";
+
+            if (selectVal === "custom") {
+                imgUrl = document.getElementById("admin-banner-custom-url").value.trim();
+            } else {
+                imgUrl = selectVal;
+            }
+
+            if (!imgUrl) {
+                showToast("적용할 이미지 URL을 지정해 주세요.", "error");
+                return;
+            }
+
+            const bannerTitle = document.getElementById("admin-banner-title-input").value.trim();
+            const bannerSubtitle = document.getElementById("admin-banner-subtitle-input").value.trim();
+
+            const updatedBanner = {
+                imageUrl: imgUrl,
+                title: bannerTitle,
+                subtitle: bannerSubtitle
+            };
+
+            try {
+                if (isFirebaseActive && db) {
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'homepage'), {
+                        banner: updatedBanner,
+                        president: state.settings.president
+                    }, { merge: true });
+                } else {
+                    state.settings.banner = updatedBanner;
+                    applyBannerState();
+                }
+                showToast("메인 배너 레이아웃 디자인 설정이 저장되었습니다.", "success");
+            } catch (err) {
+                console.error(err);
+                showToast("배너 저장 중 오류가 발생했습니다.", "error");
+            }
+        };
+
+        // PRESIDENT SAVE SETTINGS
+        window.savePresidentSettings = async function() {
+            const updatedPres = {
+                name: document.getElementById("ep-name").value.trim(),
+                dept: document.getElementById("ep-dept").value.trim(),
+                imageUrl: document.getElementById("ep-img").value.trim(),
+                title: document.getElementById("ep-title").value.trim(),
+                message: document.getElementById("ep-message").value.trim()
+            };
+
+            try {
+                if (isFirebaseActive && db) {
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'homepage'), {
+                        banner: state.settings.banner,
+                        president: updatedPres
+                    }, { merge: true });
+                } else {
+                    state.settings.president = updatedPres;
+                    applyPresidentState();
+                }
+                showToast("동문회장단 인사말 프로필 설정이 업데이트 되었습니다.", "success");
+                closeModal('modal-edit-president');
+            } catch (err) {
+                console.error(err);
+                showToast("프로필 업데이트에 실패했습니다.", "error");
+            }
+        };
+
+        // INTRO: REGISTER NEW EXECUTIVE
+        window.handleExPresetChange = function(val) {
+            const customUrl = document.getElementById("ex-img-url");
+            const fileInput = document.getElementById("ex-img-file");
+            
+            if (val === "custom") {
+                customUrl.classList.remove("hidden");
+                fileInput.classList.add("hidden");
+                customUrl.value = "";
+            } else if (val === "upload") {
+                customUrl.classList.add("hidden");
+                fileInput.classList.remove("hidden");
+                fileInput.value = "";
+            } else {
+                customUrl.classList.add("hidden");
+                fileInput.classList.add("hidden");
+                customUrl.value = val;
+            }
+        };
+
+        // UI Image compression function to prevent Firestore document size limit errors (keeps images below 100KB)
+        function compressImage(file, callback) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement("canvas");
+                    let width = img.width;
+                    let height = img.height;
+                    const max_size = 800; // Limit image bounds
+
+                    if (width > height) {
+                        if (width > max_size) {
+                            height *= max_size / width;
+                            width = max_size;
+                        }
+                    } else {
+                        if (height > max_size) {
+                            width *= max_size / height;
+                            height = max_size;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // Export to web-optimized JPEG format with 70% quality
+                    const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+                    callback(dataUrl);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Add file upload listener for Executive Form
+        document.getElementById("ex-img-file").addEventListener("change", function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                compressImage(file, function(compressedBase64) {
+                    document.getElementById("ex-img-url").value = compressedBase64;
+                });
+            }
+        });
+
+        // Add file upload listener for President Form
+        document.getElementById("ep-img-file").addEventListener("change", function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                compressImage(file, function(compressedBase64) {
+                    document.getElementById("ep-img").value = compressedBase64;
+                });
+            }
+        });
+
+        window.handleAddExecutiveSubmit = async function() {
+            const role = document.getElementById("ex-role").value.trim();
+            const name = document.getElementById("ex-name").value.trim();
+            const dept = document.getElementById("ex-dept").value.trim();
+            const slogan = document.getElementById("ex-slogan").value.trim();
+            const presetSelect = document.getElementById("ex-img-preset").value;
+            let imageUrl = "";
+
+            if (presetSelect === "custom") {
+                imageUrl = document.getElementById("ex-img-url").value.trim();
+            } else if (presetSelect === "upload") {
+                imageUrl = document.getElementById("ex-img-url").value.trim(); // contains compressed base64
+                if (!imageUrl) {
+                    showToast("이미지 파일 로딩이 완료되지 않았습니다.", "error");
+                    return;
+                }
+            } else {
+                imageUrl = presetSelect;
+            }
+
+            if (!imageUrl) imageUrl = "https://placehold.co/400x400/e2e8f0/64748b?text=" + encodeURIComponent(name);
+
+            const newEx = { role, name, dept, slogan, imageUrl };
+
+            try {
+                if (isFirebaseActive && db) {
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'executives'), newEx);
+                } else {
+                    newEx.id = "ex_" + Math.random().toString(36).substring(2, 9);
+                    state.executives.push(newEx);
+                    renderExecutives();
+                }
+                showToast(`신임 임원 (${name} 동문)님이 성공적으로 등록되었습니다.`, "success");
+                closeModal('modal-add-executive');
+                document.getElementById("add-executive-form").reset();
+            } catch (err) {
+                console.error(err);
+                showToast("임원 가입 처리에 실패했습니다.", "error");
+            }
+        };
+
+        // INTRO: DELETE AN EXECUTIVE
+        window.handleDeleteExecutive = function(id) {
+            showConfirm("임원 삭제", "선택하신 임원 정보를 임원진 명단에서 정말 삭제하시겠습니까?", async () => {
+                try {
+                    if (isFirebaseActive && db) {
+                        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'executives', id));
+                    } else {
+                        state.executives = state.executives.filter(ex => ex.id !== id);
+                        renderExecutives();
+                    }
+                    showToast("임원진 목록에서 삭제되었습니다.", "info");
+                } catch (err) {
+                    console.error(err);
+                    showToast("임원 삭제 중 오류가 발생하였습니다.", "error");
+                }
+            });
+        };
+
+        // WRITE DIALOG PRESET HANDLER
+        window.handlePresetImgChange = function(val) {
+            const customInput = document.getElementById("wp-image-url");
+            const fileInput = document.getElementById("wp-image-file");
+            const previewImg = document.getElementById("wp-image-preview");
+
+            if (val === "custom") {
+                customInput.classList.remove("hidden");
+                fileInput.classList.add("hidden");
+                customInput.value = "";
+                previewImg.src = "https://placehold.co/400x200/e2e8f0/64748b?text=Please+Enter+URL";
+            } else if (val === "upload") {
+                customInput.classList.add("hidden");
+                fileInput.classList.remove("hidden");
+                fileInput.value = "";
+                customInput.value = "";
+                previewImg.src = "https://placehold.co/400x200/e2e8f0/64748b?text=Select+Device+File";
+            } else if (val === "") {
+                customInput.classList.add("hidden");
+                fileInput.classList.add("hidden");
+                previewImg.src = "https://placehold.co/400x200/e2e8f0/64748b?text=Preview";
+            } else {
+                customInput.classList.add("hidden");
+                fileInput.classList.add("hidden");
+                customInput.value = val;
+                previewImg.src = val;
+            }
+        };
+
+        // Add file upload listener for Post Form
+        document.getElementById("wp-image-file").addEventListener("change", function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const previewImg = document.getElementById("wp-image-preview");
+                previewImg.src = "https://placehold.co/400x200/e2e8f0/64748b?text=Processing...";
+                
+                compressImage(file, function(compressedBase64) {
+                    document.getElementById("wp-image-url").value = compressedBase64;
+                    previewImg.src = compressedBase64;
+                });
+            }
+        });
+
+        // BOARD OPERATIONS: OPEN WRITE DIALOG FOR SPECIFIC TYPE
+        window.handleWritePostClick = function(type, isEdit = false) {
+            // First check if logged in
+            if (!currentUser) {
+                showToast("게시판 글을 작성하시려면 우측 상단에서 동문회원으로 간편 로그인을 해주세요.", "error");
+                openModal('modal-login');
+                return;
+            }
+
+            if (!isEdit) {
+                editingPostId = null;
+            }
+
+            // Format Modal
+            document.getElementById("wp-type").value = type;
+            if (!isEdit) {
+                document.getElementById("write-post-form").reset();
+                document.getElementById("wp-image-preset").value = "";
+                document.getElementById("wp-image-url").classList.add("hidden");
+                document.getElementById("wp-image-file").classList.add("hidden");
+                document.getElementById("wp-image-preview").src = "https://placehold.co/400x200/e2e8f0/64748b?text=Preview";
+            }
+
+            const titleInput = document.getElementById("wp-title");
+            const contentInput = document.getElementById("wp-content");
+            const mHeader = document.getElementById("write-modal-header");
+            const mTitle = document.getElementById("write-modal-title");
+
+            const extra1Container = document.getElementById("wp-extra-1-container");
+            const extra2Container = document.getElementById("wp-extra-2-container");
+            const imgContainer = document.getElementById("wp-image-container");
+
+            // Custom UI elements dynamically by Type
+            if (type === 'events') {
+                mHeader.className = "bg-blue-900 text-white px-6 py-4 flex justify-between items-center";
+                mTitle.innerHTML = isEdit ? `<i class="fa-solid fa-camera"></i> 행사 이모저모 수정` : `<i class="fa-solid fa-camera"></i> 행사 이모저모 글쓰기`;
+                titleInput.placeholder = "행사 명칭을 기재해 주세요. (예: 제12회 방송대 창원 한마음 골프대회)";
+                contentInput.placeholder = "행사에 관한 따뜻한 스케치 일지를 공유해 주세요.";
+                
+                extra1Container.classList.add("hidden");
+                extra2Container.classList.add("hidden");
+                imgContainer.classList.remove("hidden");
+
+            } else if (type === 'business') {
+                mHeader.className = "bg-emerald-700 text-white px-6 py-4 flex justify-between items-center";
+                mTitle.innerHTML = isEdit ? `<i class="fa-solid fa-store"></i> 동문 사업체 수정` : `<i class="fa-solid fa-store"></i> 동문 사업체 홍보하기`;
+                titleInput.placeholder = "대표 홍보 문구를 작성해 주세요. (예: 정직한 먹거리, 성산정육식당입니다.)";
+                contentInput.placeholder = "동문들에게 소개할 주력 상품 정보나 동문 특별 혜택 등을 적어주세요.";
+
+                extra1Container.classList.remove("hidden");
+                document.getElementById("wp-label-extra-1").textContent = "상호명 및 대표자명";
+                document.getElementById("wp-extra-1").placeholder = "성산정육식당 (대표: 김학우)";
+
+                extra2Container.classList.remove("hidden");
+                document.getElementById("wp-label-extra-2").textContent = "연락처 및 매장 상세위치";
+                document.getElementById("wp-extra-2").placeholder = "창원시 성산구 가음정동 14-2 / 055-123-1122";
+
+                imgContainer.classList.remove("hidden");
+
+            } else {
+                // Free Board
+                mHeader.className = "bg-amber-500 text-slate-950 px-6 py-4 flex justify-between items-center";
+                mTitle.innerHTML = isEdit ? `<i class="fa-solid fa-comments"></i> 자유게시판 수정` : `<i class="fa-solid fa-comments"></i> 자유게시판 글쓰기`;
+                titleInput.placeholder = "제목을 입력해 주세요.";
+                contentInput.placeholder = "학업 에피소드, 소소한 창원의 일상 등 자유로운 교류를 위한 내용을 공유해 주세요.";
+
+                extra1Container.classList.add("hidden");
+                extra2Container.classList.add("hidden");
+                imgContainer.classList.add("hidden");
+            }
+
+            openModal('modal-write-post');
+        };
+
+        // SUBMIT WRITTEN POST
+        window.handleWriteSubmit = async function() {
+            const type = document.getElementById("wp-type").value;
+            const title = document.getElementById("wp-title").value.trim();
+            const content = document.getElementById("wp-content").value.trim();
+            const extra1 = document.getElementById("wp-extra-1").value.trim();
+            const extra2 = document.getElementById("wp-extra-2").value.trim();
+            
+            let imageUrl = "";
+            if (type !== 'free') {
+                const presetVal = document.getElementById("wp-image-preset").value;
+                if (presetVal === 'custom' || presetVal === 'upload') {
+                    imageUrl = document.getElementById("wp-image-url").value.trim();
+                } else {
+                    imageUrl = presetVal;
+                }
+
+                if (!imageUrl) {
+                    imageUrl = "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&q=80&w=800";
+                }
+            }
+
+            const collectionMap = {
+                events: "posts_events",
+                business: "posts_business",
+                free: "posts_free"
+            };
+            const targetCollection = collectionMap[type];
+
+            if (editingPostId) {
+                // UPDATE EXISITING POST
+                const updatedPost = {
+                    title,
+                    content,
+                    extra1: extra1 || "",
+                    extra2: extra2 || "",
+                    imageUrl: imageUrl || ""
+                };
+
+                try {
+                    if (isFirebaseActive && db) {
+                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', targetCollection, editingPostId);
+                        await updateDoc(docRef, updatedPost);
+                    } else {
+                        const index = state[targetCollection].findIndex(p => p.id === editingPostId);
+                        if (index !== -1) {
+                            state[targetCollection][index] = {
+                                ...state[targetCollection][index],
+                                ...updatedPost
+                            };
+                        }
+                    }
+                    showToast("선택하신 게시물 및 대표 이미지가 수정되었습니다.", "success");
+                    closeModal('modal-write-post');
+                    closeModal('modal-post-detail');
+
+                    if (type === 'events') renderEventsBoard();
+                    else if (type === 'business') renderBusinessBoard();
+                    else renderFreeBoard();
+                    
+                    renderHomePreviews();
+                    updateStats();
+                } catch (err) {
+                    console.error(err);
+                    showToast("게시물 수정에 실패했습니다.", "error");
+                }
+            } else {
+                // CREATE NEW POST
+                const newPost = {
+                    title,
+                    content,
+                    extra1: extra1 || "",
+                    extra2: extra2 || "",
+                    imageUrl: imageUrl || "",
+                    author: `${currentUser.name}(${currentUser.dept})`,
+                    authorId: currentUser.phone, // Bind identification via phone key securely
+                    date: new Date().toISOString().split('T')[0],
+                    views: 0
+                };
+
+                try {
+                    if (isFirebaseActive && db) {
+                        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', targetCollection), newPost);
+                    } else {
+                        newPost.id = type.substring(0, 3) + "_" + Math.random().toString(36).substring(2, 9);
+                        state[targetCollection].unshift(newPost);
+                        
+                        if (type === 'events') renderEventsBoard();
+                        else if (type === 'business') renderBusinessBoard();
+                        else renderFreeBoard();
+                        
+                        renderHomePreviews();
+                        updateStats();
+                    }
+
+                    showToast("소중한 한 줄이 동문회에 등록 완료되었습니다.", "success");
+                    closeModal('modal-write-post');
+                } catch (err) {
+                    console.error(err);
+                    showToast("게시물 업로드 과정에 장애가 있습니다.", "error");
+                }
+            }
+        };
+
+        // EDIT POST VIA DETAILS PANEL
+        window.handleEditPostClick = function() {
+            if (!activeDetailPost || !activeDetailType) return;
+            
+            editingPostId = activeDetailPost.id;
+            const type = activeDetailType;
+            
+            // Invoke form pre-populated configurations
+            handleWritePostClick(type, true);
+            
+            document.getElementById("wp-title").value = activeDetailPost.title;
+            document.getElementById("wp-content").value = activeDetailPost.content;
+            document.getElementById("wp-extra-1").value = activeDetailPost.extra1 || "";
+            document.getElementById("wp-extra-2").value = activeDetailPost.extra2 || "";
+            
+            if (type !== 'free') {
+                const presetSelect = document.getElementById("wp-image-preset");
+                const customUrl = document.getElementById("wp-image-url");
+                const fileInput = document.getElementById("wp-image-file");
+                const previewImg = document.getElementById("wp-image-preview");
+                
+                const isPreset = Array.from(presetSelect.options).some(opt => opt.value === activeDetailPost.imageUrl);
+                
+                fileInput.classList.add("hidden");
+                if (isPreset) {
+                    presetSelect.value = activeDetailPost.imageUrl;
+                    customUrl.classList.add("hidden");
+                } else if (activeDetailPost.imageUrl.startsWith("data:image/")) {
+                    // It is a user uploaded file
+                    presetSelect.value = "upload";
+                    customUrl.classList.add("hidden");
+                    fileInput.classList.remove("hidden");
+                    customUrl.value = activeDetailPost.imageUrl; // Store base64 data back
+                } else {
+                    presetSelect.value = "custom";
+                    customUrl.classList.remove("hidden");
+                    customUrl.value = activeDetailPost.imageUrl;
+                }
+                
+                previewImg.src = activeDetailPost.imageUrl || "https://placehold.co/400x200/e2e8f0/64748b?text=Preview";
+            }
+        };
+
+        // BOARD OPERATIONS: DETAIL VIEW WITH VIEW COUNT INCREMENT
+        let activeDetailPost = null; // Memory marker for delete action
+        let activeDetailType = null;
+
+        window.viewPostDetail = async function(type, id) {
+            const collectionMap = {
+                events: "posts_events",
+                business: "posts_business",
+                free: "posts_free"
+            };
+
+            const targetCollection = collectionMap[type];
+            const post = state[targetCollection].find(p => p.id === id);
+            if (!post) return;
+
+            activeDetailPost = post;
+            activeDetailType = type;
+
+            // Increment Views in JS state locally
+            post.views = (post.views || 0) + 1;
+            
+            // Sync View Increment to DB asynchronously
+            if (isFirebaseActive && db) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', targetCollection, id);
+                    await updateDoc(docRef, { views: post.views });
+                } catch (e) {
+                    console.error("View increment syncing error:", e);
+                }
+            } else {
+                if (type === 'events') renderEventsBoard();
+                else if (type === 'business') renderBusinessBoard();
+                else renderFreeBoard();
+            }
+
+            // Populate Dialog Fields
+            const badge = document.getElementById("detail-badge");
+            const metaBox = document.getElementById("detail-meta-box");
+            const imgWrapper = document.getElementById("detail-img-wrapper");
+
+            document.getElementById("detail-title").textContent = post.title;
+            document.getElementById("detail-author").textContent = post.author;
+            document.getElementById("detail-date").textContent = post.date;
+            document.getElementById("detail-views").textContent = post.views;
+            document.getElementById("detail-content").textContent = post.content;
+
+            if (type === 'events') {
+                badge.className = "text-xs font-black bg-blue-100 text-blue-900 px-2.5 py-1 rounded shadow";
+                badge.textContent = "행사 이모저모";
+                
+                metaBox.classList.add("hidden");
+                if (post.imageUrl) {
+                    imgWrapper.classList.remove("hidden");
+                    document.getElementById("detail-img").src = post.imageUrl;
+                } else {
+                    imgWrapper.classList.add("hidden");
+                }
+
+            } else if (type === 'business') {
+                badge.className = "text-xs font-black bg-emerald-100 text-emerald-900 px-2.5 py-1 rounded shadow";
+                badge.textContent = "동문 사업체";
+
+                metaBox.classList.remove("hidden");
+                document.getElementById("detail-meta-label-1").textContent = "상호명 및 대표";
+                document.getElementById("detail-meta-val-1").textContent = post.extra1;
+                document.getElementById("detail-meta-label-2").textContent = "위치 및 연락처";
+                document.getElementById("detail-meta-val-2").textContent = post.extra2;
+
+                if (post.imageUrl) {
+                    imgWrapper.classList.remove("hidden");
+                    document.getElementById("detail-img").src = post.imageUrl;
+                } else {
+                    imgWrapper.classList.add("hidden");
+                }
+
+            } else {
+                // Free
+                badge.className = "text-xs font-black bg-amber-100 text-amber-950 px-2.5 py-1 rounded shadow";
+                badge.textContent = "자유수다방";
+                metaBox.classList.add("hidden");
+                imgWrapper.classList.add("hidden");
+            }
+
+            // Delete / Edit validation trigger (Admin or Owner matching phone credentials)
+            const deleteBtn = document.getElementById("detail-delete-btn");
+            const editBtn = document.getElementById("detail-edit-btn");
+            const isOwner = currentUser && (currentUser.phone === post.authorId);
+            
+            if (isAdminMode || isOwner) {
+                deleteBtn.classList.remove("hidden");
+                editBtn.classList.remove("hidden");
+            } else {
+                deleteBtn.classList.add("hidden");
+                editBtn.classList.add("hidden");
+            }
+
+            openModal('modal-post-detail');
+        };
+
+        // BOARD OPERATIONS: DELETE POST
+        window.handleDeletePost = function() {
+            if (!activeDetailPost || !activeDetailType) return;
+            
+            showConfirm("게시글 삭제", "해당 동문 게시글을 영구적으로 완전히 삭제하시겠습니까?", async () => {
+                const collectionMap = {
+                    events: "posts_events",
+                    business: "posts_business",
+                    free: "posts_free"
+                };
+
+                const targetCollection = collectionMap[activeDetailType];
+
+                try {
+                    if (isFirebaseActive && db) {
+                        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', targetCollection, activeDetailPost.id));
+                    } else {
+                        state[targetCollection] = state[targetCollection].filter(p => p.id !== activeDetailPost.id);
+                        
+                        if (activeDetailType === 'events') renderEventsBoard();
+                        else if (activeDetailType === 'business') renderBusinessBoard();
+                        else renderFreeBoard();
+
+                        renderHomePreviews();
+                        updateStats();
+                    }
+
+                    showToast("선택하신 게시물이 무사히 삭제 조치되었습니다.", "info");
+                    closeModal('modal-post-detail');
+                } catch (err) {
+                    console.error(err);
+                    showToast("삭제 실행 중 에러가 발생하였습니다.", "error");
+                }
+            });
+        };
+
+        // ROUTING SYSTEM: SINGLE PAGE NAVIGATION
+        window.navigateTo = function(targetSectionId) {
+            // Verify access limits for admin-members dashboard page
+            if (targetSectionId === 'admin-members') {
+                if (!currentUser || !currentUser.isAdmin || !isAdminMode) {
+                    showToast("회원 관리 대시보드는 총괄 관리자 모드 상태에서만 접근할 수 있습니다.", "error");
+                    navigateTo('home');
+                    return;
+                }
+                // Refresh list on navigate
+                renderAdminMembers();
+            }
+
+            const sections = document.querySelectorAll(".page-section");
+            sections.forEach(sec => {
+                if (sec.id === `section-${targetSectionId}`) {
+                    sec.classList.remove("hidden");
+                } else {
+                    sec.classList.add("hidden");
+                }
+            });
+
+            // Active State class highlight styling for navigation buttons
+            const navButtons = document.querySelectorAll(".nav-btn");
+            navButtons.forEach(btn => {
+                if (btn.getAttribute("onclick").includes(`'${targetSectionId}'`)) {
+                    btn.classList.add("bg-blue-800", "text-amber-300", "border-b-2", "border-amber-400");
+                } else {
+                    btn.classList.remove("bg-blue-800", "text-amber-300", "border-b-2", "border-amber-400");
+                }
+            });
+
+            // Close mobile menu on transition click
+            const mMenu = document.getElementById("mobile-menu");
+            const mIcon = document.getElementById("menu-icon");
+            mMenu.classList.add("hidden");
+            mIcon.className = "fa-solid fa-bars text-2xl";
+
+            // Scroll to the absolute top smoothly
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        // UTILITY: MODAL CONTROL FUNCTIONS
+        window.openModal = function(id) {
+            document.getElementById(id).classList.remove("hidden");
+            document.body.style.overflow = "hidden"; // Block screen scroll behind modal
+        };
+
+        window.closeModal = function(id) {
+            document.getElementById(id).classList.add("hidden");
+            document.body.style.overflow = "auto";
+        };
+
+        // MOBILE DRAWER MENU TOGGLE
+        window.toggleMobileMenu = function() {
+            const mMenu = document.getElementById("mobile-menu");
+            const mIcon = document.getElementById("menu-icon");
+            if (mMenu.classList.contains("hidden")) {
+                mMenu.classList.remove("hidden");
+                mIcon.className = "fa-solid fa-xmark text-2xl";
+            } else {
+                mMenu.classList.add("hidden");
+                mIcon.className = "fa-solid fa-bars text-2xl";
+            }
+        };
+
+        // FIRE ON WINDOW LOAD
+        window.onload = function() {
+            // Trigger Authentication workflow
+            authenticateAndInit();
+            
+            // Set default view active highlight
+            navigateTo('home');
+        };
+    </script>
+</body>
+</html>
